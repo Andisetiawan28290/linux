@@ -1390,14 +1390,14 @@ static int gfx_v7_0_init_microcode(struct amdgpu_device *adev)
 	if (err)
 		goto out;
 
-	if (adev->asic_type == CHIP_KAVERI) ||
+	if ((adev->asic_type == CHIP_KAVERI) ||
 			(adev->asic_type == CHIP_LIVERPOOL) ||
-			(adev->asic_type == CHIP_GLADIUS) {
+			(adev->asic_type == CHIP_GLADIUS)) {
 		err = amdgpu_ucode_request(adev, &adev->gfx.mec2_fw,
 					   "amdgpu/%s_mec2.bin", chip_name);
 		if (err)
 		{
-			pr_err("gfx7: Failed to validate ucode firmware \"%s\"\n", fw_name);
+			pr_err("gfx7: Failed to validate ucode firmware \"%s\"\n", chip_name);
 			goto out;
 		}
 	}
