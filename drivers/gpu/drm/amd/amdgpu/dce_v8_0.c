@@ -420,7 +420,6 @@ static int dce_v8_0_get_num_crtc(struct amdgpu_device *adev)
 	switch (adev->asic_type) {
 	case CHIP_BONAIRE:
 	case CHIP_HAWAII:
-	case CHIP_GLADIUS:
 	case CHIP_LIVERPOOL:
 		num_crtc = 6;
 		break;
@@ -1118,8 +1117,7 @@ static void dce_v8_0_bandwidth_update(struct amdgpu_device *adev)
 	u32 num_heads = 0, lb_size;
 	int i;
 
-	if((adev->asic_type == CHIP_LIVERPOOL) ||
-	   (adev->asic_type == CHIP_GLADIUS)) {
+	if((adev->asic_type == CHIP_LIVERPOOL)) {
 		// FIXME PS4 (ps4patches): this stuff is broken
 		return;
 	}
@@ -1445,7 +1443,7 @@ static int dce_v8_0_audio_init(struct amdgpu_device *adev)
 		/* disable audio.  it will be set up later */
 		/* XXX remove once we switch to ip funcs */
 		/* Liverpool pin 2 is S/PDIF and should always be available */
-		if (adev->asic_type == CHIP_LIVERPOOL || adev->asic_type == CHIP_GLADIUS)
+		if (adev->asic_type == CHIP_LIVERPOOL)
 			dce_v8_0_audio_enable(adev, &adev->mode_info.audio.pin[i], true);
 		else
 			dce_v8_0_audio_enable(adev, &adev->mode_info.audio.pin[i], false);
@@ -2024,8 +2022,7 @@ static int dce_v8_0_crtc_do_set_base(struct drm_crtc *crtc,
 	}
 
 	/* Bytes per pixel may have changed */
-	if ((adev->asic_type != CHIP_LIVERPOOL) &&
-	    (adev->asic_type != CHIP_GLADIUS))
+	if ((adev->asic_type != CHIP_LIVERPOOL))
 		dce_v8_0_bandwidth_update(adev);
 
 	return 0;
@@ -2643,7 +2640,7 @@ static int dce_v8_0_crtc_init(struct amdgpu_device *adev, int index)
 	amdgpu_crtc->crtc_id = index;
 	adev->mode_info.crtcs[index] = amdgpu_crtc;
 
-	if ((adev->asic_type == CHIP_LIVERPOOL) || (adev->asic_type == CHIP_GLADIUS)) {
+	if ((adev->asic_type == CHIP_LIVERPOOL)) {
 		amdgpu_crtc->max_cursor_width = LVP_CURSOR_WIDTH;
 		amdgpu_crtc->max_cursor_height = LVP_CURSOR_HEIGHT;
 		adev_to_drm(adev)->mode_config.cursor_width = amdgpu_crtc->max_cursor_width;
@@ -2681,7 +2678,6 @@ static int dce_v8_0_early_init(void *handle)
 	switch (adev->asic_type) {
 	case CHIP_BONAIRE:
 	case CHIP_HAWAII:
-	case CHIP_GLADIUS:
 		adev->mode_info.num_hpd = 6;
 		adev->mode_info.num_dig = 6;
 		break;
@@ -2824,7 +2820,7 @@ static int dce_v8_0_hw_init(void *handle)
 	for (i = 0; i < adev->mode_info.audio.num_pins; i++) {
 		// TODO (ps4patches): In original patches original disable was still here
 		// Maybe that is still needed
-		if (adev->asic_type == CHIP_LIVERPOOL || adev->asic_type == CHIP_GLADIUS)
+		if (adev->asic_type == CHIP_LIVERPOOL)
 			dce_v8_0_audio_enable(adev, &adev->mode_info.audio.pin[i], true);
 		else
 			dce_v8_0_audio_enable(adev, &adev->mode_info.audio.pin[i], false);

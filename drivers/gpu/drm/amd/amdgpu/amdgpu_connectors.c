@@ -1654,7 +1654,7 @@ amdgpu_connector_add(struct amdgpu_device *adev,
 
 	/* Liverpool (PS4) has an DP bridge which needs a special driver, and
 	 * a fake HDMI port that doesn't really exist. */
-	if (adev->asic_type == CHIP_LIVERPOOL || adev->asic_type == CHIP_GLADIUS) {
+	if (adev->asic_type == CHIP_LIVERPOOL) {
 		if (connector_type == DRM_MODE_CONNECTOR_DisplayPort) {
 			connector_type = DRM_MODE_CONNECTOR_HDMIA;
 			is_dp_bridge = true;

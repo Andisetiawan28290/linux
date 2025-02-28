@@ -148,7 +148,6 @@ static int gmc_v7_0_init_microcode(struct amdgpu_device *adev)
 	case CHIP_KABINI:
 	case CHIP_MULLINS:
 	case CHIP_LIVERPOOL:
-	case CHIP_GLADIUS:
 		return 0;
 	default:
 		return -EINVAL;
@@ -393,7 +392,6 @@ static int gmc_v7_0_mc_init(struct amdgpu_device *adev)
 			break;
 #ifdef CONFIG_DRM_AMDGPU_CIK
 		case CHIP_LIVERPOOL:
-		case CHIP_GLADIUS:
 			adev->gmc.gart_size = 512ULL << 20;
 			break;
 		case CHIP_BONAIRE: /* UVD, VCE do not support GPUVM */
@@ -676,7 +674,7 @@ static int gmc_v7_0_gart_enable(struct amdgpu_device *adev)
 			       table_addr >> 12);
 	}
 
-	if (adev->asic_type == CHIP_LIVERPOOL || adev->asic_type == CHIP_GLADIUS) {
+	if (adev->asic_type == CHIP_LIVERPOOL) {
 		for (i = 2; i < 8; i++) {
 			WREG32(mmVM_CONTEXT0_PAGE_TABLE_START_ADDR + i, 0);
 			WREG32(mmVM_CONTEXT0_PAGE_TABLE_END_ADDR + i,

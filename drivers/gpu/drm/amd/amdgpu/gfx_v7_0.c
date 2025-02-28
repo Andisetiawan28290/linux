@@ -1363,9 +1363,6 @@ static int gfx_v7_0_init_microcode(struct amdgpu_device *adev)
 	case CHIP_LIVERPOOL:
 		chip_name = "liverpool";
 		break;
-	case CHIP_GLADIUS:
-		chip_name = "gladius";
-		break;
 	default:
 		BUG();
 	}
@@ -1391,8 +1388,7 @@ static int gfx_v7_0_init_microcode(struct amdgpu_device *adev)
 		goto out;
 
 	if ((adev->asic_type == CHIP_KAVERI) ||
-			(adev->asic_type == CHIP_LIVERPOOL) ||
-			(adev->asic_type == CHIP_GLADIUS)) {
+			(adev->asic_type == CHIP_LIVERPOOL)) {
 		err = amdgpu_ucode_request(adev, &adev->gfx.mec2_fw,
 					   "amdgpu/%s_mec2.bin", chip_name);
 		if (err)
@@ -1623,7 +1619,6 @@ static void gfx_v7_0_tiling_mode_table_init(struct amdgpu_device *adev)
 		break;
 
 	case CHIP_LIVERPOOL:
-	case CHIP_GLADIUS:
 		tile[0] = (ARRAY_MODE(ARRAY_2D_TILED_THIN1) |
 				   MICRO_TILE_MODE_NEW(ADDR_SURF_DEPTH_MICRO_TILING) |
 				   PIPE_CONFIG(ADDR_SURF_P8_32x32_16x16) |
@@ -2215,10 +2210,6 @@ gfx_v7_0_raster_config(struct amdgpu_device *adev, u32 *rconf, u32 *rconf1)
 			  PKR_YSEL(1) | SE_MAP(2) | SE_XSEL(2) |
 			  SE_YSEL(2);
 		*rconf1 |= 0x0;
-		break;
-	case CHIP_GLADIUS:
-		*rconf |= 0x2a00161a;
-		*rconf1 |= 0x0000002e;
 		break;
 	default:
 		DRM_ERROR("unknown asic: 0x%x\n", adev->asic_type);
@@ -3270,8 +3261,7 @@ static int gfx_v7_0_cp_compute_load_microcode(struct amdgpu_device *adev)
 	WREG32(mmCP_MEC_ME1_UCODE_ADDR, 0);
 
 	if ((adev->asic_type == CHIP_KAVERI) ||
-	    (adev->asic_type == CHIP_LIVERPOOL) ||
-	    (adev->asic_type == CHIP_GLADIUS)) {
+	    (adev->asic_type == CHIP_LIVERPOOL)) {
 		const struct gfx_firmware_header_v1_0 *mec2_hdr;
 
 		if (!adev->gfx.mec2_fw)
@@ -3802,11 +3792,6 @@ static int gfx_v7_0_rlc_init(struct amdgpu_device *adev)
 			adev->gfx.rlc.reg_list = liverpool_rlc_save_restore_register_list;
 			adev->gfx.rlc.reg_list_size =
 				(u32)ARRAY_SIZE(liverpool_rlc_save_restore_register_list);
-		} else if (adev->asic_type == CHIP_GLADIUS) {
-			adev->gfx.rlc.reg_list =
-				liverpool_rlc_save_restore_register_list;
-			adev->gfx.rlc.reg_list_size = (u32)ARRAY_SIZE(
-				liverpool_rlc_save_restore_register_list);
 		} else {
 			adev->gfx.rlc.reg_list = kalindi_rlc_save_restore_register_list;
 			adev->gfx.rlc.reg_list_size =
@@ -4539,10 +4524,6 @@ static void gfx_v7_0_get_csb_buffer(struct amdgpu_device *adev,
 		buffer[count++] = cpu_to_le32(0x2a00161a);
 		buffer[count++] = cpu_to_le32(0x00000000);
 		break;
-	case CHIP_GLADIUS:
-		buffer[count++] = cpu_to_le32(0x2a00161a);
-		buffer[count++] = cpu_to_le32(0x0000002e);
-		break;
 	default:
 		buffer[count++] = cpu_to_le32(0x00000000);
 		buffer[count++] = cpu_to_le32(0x00000000);
@@ -4860,24 +4841,6 @@ static void gfx_v7_0_gpu_early_init(struct amdgpu_device *adev)
 		adev->gfx.config.sc_earlyz_tile_fifo_size = 0x130;
 		gb_addr_config = HAWAII_GB_ADDR_CONFIG_GOLDEN;
 		break;
-
-	case CHIP_GLADIUS:
-		adev->gfx.config.max_shader_engines = 4; // Verified
-		adev->gfx.config.max_tile_pipes = 8; // Verified
-		adev->gfx.config.max_cu_per_sh = 9; // Probably OK
-		adev->gfx.config.max_sh_per_se = 1; // Verified
-		adev->gfx.config.max_backends_per_se = 2; // Probably OK?
-		adev->gfx.config.max_texture_channel_caches = 8; // ??
-		adev->gfx.config.max_gprs = 256;
-		adev->gfx.config.max_gs_threads = 32; // ??
-		adev->gfx.config.max_hw_contexts = 8;
-
-		adev->gfx.config.sc_prim_fifo_size_frontend = 0x20;
-		adev->gfx.config.sc_prim_fifo_size_backend = 0x100;
-		adev->gfx.config.sc_hiz_tile_fifo_size = 0x30;
-		adev->gfx.config.sc_earlyz_tile_fifo_size = 0x130;
-		gb_addr_config = 0x10000000; //0x22011003; //0x12011003;
-		break;
 	case CHIP_KABINI:
 	case CHIP_MULLINS:
 	default:
@@ -5004,7 +4967,6 @@ static int gfx_v7_0_sw_init(void *handle)
 	switch (adev->asic_type) {
 	case CHIP_KAVERI:
 	case CHIP_LIVERPOOL:
-	case CHIP_GLADIUS:
 		adev->gfx.mec.num_mec = 2;
 		break;
 	case CHIP_BONAIRE:
@@ -5790,8 +5752,7 @@ static void gfx_v7_0_get_cu_info(struct amdgpu_device *adev)
 	u32 ao_cu_num;
 
 	if ((adev->flags & AMD_IS_APU) &&
-	    (adev->asic_type != CHIP_LIVERPOOL) &&
-	    (adev->asic_type != CHIP_GLADIUS))
+	    (adev->asic_type != CHIP_LIVERPOOL))
 		ao_cu_num = 2;
 	else
 		ao_cu_num = adev->gfx.config.max_cu_per_sh;

@@ -42,7 +42,7 @@ static void amdgpu_maybe_add_bridge(struct drm_connector *connector,
 	struct drm_device *dev = connector->dev;
 	struct amdgpu_device *adev = drm_to_adev(dev);
 
-	if (adev->asic_type == CHIP_LIVERPOOL || adev->asic_type == CHIP_GLADIUS) {
+	if (adev->asic_type == CHIP_LIVERPOOL) {
 		ps4_bridge_register(connector, encoder);
 	}
 }

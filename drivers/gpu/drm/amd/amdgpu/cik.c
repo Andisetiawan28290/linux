@@ -137,7 +137,6 @@ static int cik_query_video_codecs(struct amdgpu_device *adev, bool encode,
 	case CHIP_KABINI:
 	case CHIP_MULLINS:
 	case CHIP_LIVERPOOL:
-	case CHIP_GLADIUS:
 		if (encode)
 			*codecs = &cik_video_codecs_encode;
 		else
@@ -939,57 +938,6 @@ static const u32 liverpool_golden_registers[] =
 	0x535, 0xffffffff, 0x00000000, /* VM_CONTEXTS_DISABLE */
 };
 
-static const u32 gladius_golden_common_registers[] =
-{
-	mmATC_MISC_CG, 0x000c0fc0, 0x000c0200,
-	mmCB_HW_CONTROL, 0x0001f3cf, 0x00007208,	// 0x2684
-	mmCB_HW_CONTROL_2, 0x0f000000, 0x0f000000,
-	mmCB_HW_CONTROL_3, 0x000001ff, 0x00000040,
-	mmDB_DEBUG2, 0xf00fffff, 0x00000400,
-	mmPA_SC_ENHANCE, 0xffffffff, 0x20000001,
-	mmPA_SC_LINE_STIPPLE_STATE, 0x0000ff0f, 0x00000000,
-	mmPA_SC_RASTER_CONFIG, 0x3f3fffff, 0x2a00161a,
-	mmPA_SC_RASTER_CONFIG_1, 0x0000003f, 0x0000002e,
-	mmRLC_CGCG_CGLS_CTRL, 0x00000003, 0x0020003c, //0x0001003c,
-	0xec9d, 0xffffffff, 0x0001003c,//mmRLC_CGCG_CGLS_CTRL_3D, 0xffffffff, 0x0001003c,
-	mmSQ_CONFIG, 0x07f80000, 0x07180000,
-	mmTA_CNTL_AUX, 0x000f000f, 0x000b0000,
-	mmTCC_CTRL, 0x00100000, 0xf31fff7f,
-	mmTCP_ADDR_CONFIG, 0x000003ff, 0x000000f7,
-	mmTCP_CHAN_STEER_HI, 0xffffffff, 0x00000000,
-	mmVGT_RESET_DEBUG, 0x00000004, 0x00000004,
-	mmDCI_CLK_CNTL, 0x00000080, 0x00000000,
-	mmFBC_DEBUG_COMP, 0x000000f0, 0x00000070,
-	mmFBC_MISC, 0x9f313fff, 0x14302008,
-	mmHDMI_CONTROL, 0x313f031f, 0x00000011,
-};
-
-static const u32 gladius_golden_registers[] =
-{
-	mmGRBM_GFX_INDEX, 0xffffffff, 0xe0000000,
-	mmPA_SC_RASTER_CONFIG, 0xffffffff, 0x2a00161a,
-	mmPA_SC_RASTER_CONFIG_1, 0xffffffff, 0x0000002e,
-	mmGB_ADDR_CONFIG, 0xffffffff, 0x22011003, //0x22011003,
-	mmSPI_RESOURCE_RESERVE_CU_0, 0xffffffff, 0x00000800,
-	mmSPI_RESOURCE_RESERVE_CU_1, 0xffffffff, 0x00000800,
-	mmSPI_RESOURCE_RESERVE_EN_CU_0, 0xffffffff, 0x00FF7FBF,
-	mmSPI_RESOURCE_RESERVE_EN_CU_1, 0xffffffff, 0x00FF7FAF,
-	0x535, 0xffffffff, 0x00000000, /* VM_CONTEXTS_DISABLE */
-
-};
-
-static const u32 gladius_mgcg_cgcg_init[] =
-{
-	0x0000313a, 0xffffffff, 0x00000003,
-	0x00003079, 0xffffffff, 0x00020201,
-	0x00003108, 0xffffffff, 0xfffffffd,
-	0x0000c200, 0xffffffff, 0xe0000000,
-	0x0000311d, 0xffffffff, 0xffffffff,
-	0x0000311e, 0xffffffff, 0xffffffff,
-	0x0000311f, 0xffffffff, 0x004000ff,
-	0x0000313a, 0xffffffff, 0x00000001,
-};
-
 static const u32 godavari_golden_registers[] =
 {
 	0x1579, 0xff607fff, 0xfc000100,
@@ -1114,21 +1062,6 @@ static void cik_init_golden_registers(struct amdgpu_device *adev)
 						 liverpool_golden_common_registers,
 						 ARRAY_SIZE(liverpool_golden_common_registers));
 		// TODO (ps4patches): no spm registers, try the bonaire ones?
-		break;
-	case CHIP_GLADIUS:
-		amdgpu_device_program_register_sequence(adev,
-						 gladius_mgcg_cgcg_init,
-						 ARRAY_SIZE(gladius_mgcg_cgcg_init));
-		amdgpu_device_program_register_sequence(adev,
-						 gladius_golden_registers,
-						 ARRAY_SIZE(gladius_golden_registers));
-		amdgpu_device_program_register_sequence(adev,
-						 gladius_golden_common_registers,
-						 ARRAY_SIZE(gladius_golden_common_registers));
-		// TODO (ps4patches): Why is this using the Hawaii golden spm registers, that seems wrong?
-		amdgpu_device_program_register_sequence(adev,
-						 hawaii_golden_spm_registers,
-						 ARRAY_SIZE(hawaii_golden_spm_registers));
 		break;
 	default:
 		break;
@@ -2374,35 +2307,6 @@ static int cik_common_early_init(void *handle)
 				0;
 			adev->external_rev_id = adev->rev_id + 0x61;
 			break;
-
-		case CHIP_GLADIUS:
-			adev->cg_flags =
-				AMD_CG_SUPPORT_GFX_MGCG |
-				AMD_CG_SUPPORT_GFX_MGLS |
-				AMD_CG_SUPPORT_GFX_CGCG |
-				AMD_CG_SUPPORT_GFX_CGLS |
-				AMD_CG_SUPPORT_GFX_CGTS |
-				AMD_CG_SUPPORT_GFX_CGTS_LS |
-				AMD_CG_SUPPORT_GFX_CP_LS |
-				AMD_CG_SUPPORT_SDMA_MGCG |
-				AMD_CG_SUPPORT_SDMA_LS |
-				AMD_CG_SUPPORT_BIF_LS |
-				AMD_CG_SUPPORT_VCE_MGCG |
-				AMD_CG_SUPPORT_UVD_MGCG |
-				AMD_CG_SUPPORT_HDP_LS |
-				AMD_CG_SUPPORT_HDP_MGCG;
-			adev->pg_flags =
-				/*AMD_PG_SUPPORT_GFX_PG |
-					AMD_PG_SUPPORT_GFX_SMG | */
-				/*AMD_PG_SUPPORT_UVD | */
-				/*AMD_PG_SUPPORT_VCE |
-					AMD_PG_SUPPORT_CP |
-					AMD_PG_SUPPORT_GDS |
-					AMD_PG_SUPPORT_RLC_SMU_HS |
-					AMD_PG_SUPPORT_SAMU |*/
-				0;
-			adev->external_rev_id = adev->rev_id + 0x71;
-			break;
 	default:
 		/* FIXME: not supported yet */
 		return -EINVAL;
@@ -2600,24 +2504,6 @@ int cik_set_ip_blocks(struct amdgpu_device *adev)
 #endif
 		else
 			amdgpu_device_ip_block_add(adev, &dce_v8_1_ip_block);
-		amdgpu_device_ip_block_add(adev, &gfx_v7_1_ip_block);
-		amdgpu_device_ip_block_add(adev, &cik_sdma_ip_block);
-		/*amdgpu_device_ip_block_add(adev, &uvd_v4_2_ip_block)*/;
-		/*amdgpu_device_ip_block_add(adev, &vce_v2_0_ip_block)*/;
-		break;
-	case CHIP_GLADIUS:
-		amdgpu_device_ip_block_add(adev, &cik_common_ip_block);
-		amdgpu_device_ip_block_add(adev, &gmc_v7_0_ip_block);
-		amdgpu_device_ip_block_add(adev, &cik_ih_ip_block);
-		//amdgpu_device_ip_block_add(adev, &pp_smu_ip_block);
-		if (adev->enable_virtual_display)
-			amdgpu_device_ip_block_add(adev, &amdgpu_vkms_ip_block);
-#if defined(CONFIG_DRM_AMD_DC)
-		else if (amdgpu_device_has_dc_support(adev))
-			amdgpu_device_ip_block_add(adev, &dm_ip_block);
-#endif
-		else
-		amdgpu_device_ip_block_add(adev, &dce_v8_1_ip_block);
 		amdgpu_device_ip_block_add(adev, &gfx_v7_1_ip_block);
 		amdgpu_device_ip_block_add(adev, &cik_sdma_ip_block);
 		/*amdgpu_device_ip_block_add(adev, &uvd_v4_2_ip_block)*/;

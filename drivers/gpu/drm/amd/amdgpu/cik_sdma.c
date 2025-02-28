@@ -134,9 +134,6 @@ static int cik_sdma_init_microcode(struct amdgpu_device *adev)
 	case CHIP_LIVERPOOL:
 		chip_name = "liverpool";
 		break;
-	case CHIP_GLADIUS:
-		chip_name = "gladius";
-		break;
 	default: BUG();
 	}
 
