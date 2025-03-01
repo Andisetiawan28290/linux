@@ -911,6 +911,7 @@ static int gfx_v8_0_ring_test_ib(struct amdgpu_ring *ring, long timeout)
 	if (tmp == 0xDEADBEEF)
 		r = 0;
 	else
+		DRM_INFO("amdgpu: gfx_v8_0_ring_test_ib failed");
 		r = -EINVAL;
 
 err2:
@@ -1924,24 +1925,28 @@ static int gfx_v8_0_sw_init(void *handle)
 	/* EOP Event */
 	r = amdgpu_irq_add_id(adev, AMDGPU_IRQ_CLIENTID_LEGACY, VISLANDS30_IV_SRCID_CP_END_OF_PIPE, &adev->gfx.eop_irq);
 	if (r)
+	DRM_ERROR("amdgpu: EOP Event failed");
 		return r;
 
 	/* Privileged reg */
 	r = amdgpu_irq_add_id(adev, AMDGPU_IRQ_CLIENTID_LEGACY, VISLANDS30_IV_SRCID_CP_PRIV_REG_FAULT,
 			      &adev->gfx.priv_reg_irq);
 	if (r)
+	DRM_ERROR("amdgpu: Privileged reg failed");
 		return r;
 
 	/* Privileged inst */
 	r = amdgpu_irq_add_id(adev, AMDGPU_IRQ_CLIENTID_LEGACY, VISLANDS30_IV_SRCID_CP_PRIV_INSTR_FAULT,
 			      &adev->gfx.priv_inst_irq);
 	if (r)
+	DRM_ERROR("amdgpu: Privileged inst failed");
 		return r;
 
 	/* Add CP EDC/ECC irq  */
 	r = amdgpu_irq_add_id(adev, AMDGPU_IRQ_CLIENTID_LEGACY, VISLANDS30_IV_SRCID_CP_ECC_ERROR,
 			      &adev->gfx.cp_ecc_error_irq);
 	if (r)
+	DRM_ERROR("amdgpu: Add CP EDC/ECC irq failed");
 		return r;
 
 	/* SQ interrupts. */
@@ -1989,6 +1994,7 @@ static int gfx_v8_0_sw_init(void *handle)
 				     AMDGPU_CP_IRQ_GFX_ME0_PIPE0_EOP,
 				     AMDGPU_RING_PRIO_DEFAULT, NULL);
 		if (r)
+		DRM_ERROR("amdgpu: set up the gfx ring failed");
 			return r;
 	}
 
@@ -2006,6 +2012,7 @@ static int gfx_v8_0_sw_init(void *handle)
 								ring_id,
 								i, k, j);
 				if (r)
+				DRM_ERROR("amdgpu: set up the gfx ring 2 failed");
 					return r;
 
 				ring_id++;
@@ -2021,17 +2028,20 @@ static int gfx_v8_0_sw_init(void *handle)
 
 	r = amdgpu_gfx_kiq_init_ring(adev, xcc_id);
 	if (r)
+	DRM_ERROR("amdgpu: amdgpu_gfx_kiq_init_ring failed");
 		return r;
 
 	/* create MQD for all compute queues as well as KIQ for SRIOV case */
 	r = amdgpu_gfx_mqd_sw_init(adev, sizeof(struct vi_mqd_allocation), 0);
 	if (r)
+	DRM_ERROR("amdgpu: amdgpu_gfx_mqd_sw_init failed");
 		return r;
 
 	adev->gfx.ce_ram_size = 0x8000;
 
 	r = gfx_v8_0_gpu_early_init(adev);
 	if (r)
+	DRM_ERROR("amdgpu: gfx_v8_0_gpu_early_init failed");
 		return r;
 
 	return 0;
@@ -6565,6 +6575,7 @@ static int gfx_v8_0_set_cp_ecc_int_state(struct amdgpu_device *adev,
 		break;
 
 	default:
+		DRM_INFO("amdgpu: gfx_v8_0_set_cp_ecc_int_state failed");
 		return -EINVAL;
 	}
 
@@ -6610,6 +6621,7 @@ static int gfx_v8_0_set_sq_int_state(struct amdgpu_device *adev,
 		break;
 
 	default:
+		DRM_INFO("amdgpu: gfx_v8_0_set_sq_int_state failed");
 		return -EINVAL;
 	}
 
@@ -6903,9 +6915,11 @@ static int gfx_v8_0_reset_kgq(struct amdgpu_ring *ring, unsigned int vmid)
 	int r;
 
 	if (amdgpu_sriov_vf(adev))
+		DRM_INFO("amdgpu: gfx_v8_0_reset_kgq failed");
 		return -EINVAL;
 
 	if (!kiq->pmf || !kiq->pmf->kiq_unmap_queues)
+		DRM_INFO("amdgpu: gfx_v8_0_reset_kgq 2 failed");
 		return -EINVAL;
 
 	spin_lock_irqsave(&kiq->ring_lock, flags);
