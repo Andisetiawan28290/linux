@@ -736,6 +736,7 @@ static void gfx_v8_0_ring_emit_de_meta(struct amdgpu_ring *ring);
 static void gfx_v8_0_init_golden_registers(struct amdgpu_device *adev)
 {
 	uint32_t data;
+	DRM_INFO("amdgpu: gfx_v8_0_init_golden_registers");
 
 	switch (adev->asic_type) {
 	case CHIP_TOPAZ:
@@ -790,6 +791,7 @@ static void gfx_v8_0_init_golden_registers(struct amdgpu_device *adev)
 							ARRAY_SIZE(polaris11_golden_common_all));
 		break;
 	case CHIP_POLARIS10:
+		DRM_INFO("amdgpu: polaris10 selected");
 		amdgpu_device_program_register_sequence(adev,
 							golden_settings_polaris10_a11,
 							ARRAY_SIZE(golden_settings_polaris10_a11));
@@ -831,6 +833,7 @@ static void gfx_v8_0_init_golden_registers(struct amdgpu_device *adev)
 							ARRAY_SIZE(stoney_golden_common_all));
 		break;
 	default:
+	DRM_ERROR("amdgpu: chip select failed");
 		break;
 	}
 }
@@ -910,9 +913,10 @@ static int gfx_v8_0_ring_test_ib(struct amdgpu_ring *ring, long timeout)
 	tmp = adev->wb.wb[index];
 	if (tmp == 0xDEADBEEF)
 		r = 0;
-	else
+	else {
 		DRM_INFO("amdgpu: gfx_v8_0_ring_test_ib failed");
 		r = -EINVAL;
+	}
 
 err2:
 	amdgpu_ib_free(adev, &ib, NULL);
@@ -1707,9 +1711,19 @@ static int gfx_v8_0_gpu_early_init(struct amdgpu_device *adev)
 		break;
 	case CHIP_POLARIS10:
 	case CHIP_VEGAM:
-		ret = amdgpu_atombios_get_gfx_info(adev);
-		if (ret)
-			return ret;
+		// ps4patches: does not work on ps4 pro
+		// lets copy values from Tonga for now
+		// ret = amdgpu_atombios_get_gfx_info(adev);
+		// if (ret) {
+		// 	DRM_ERROR("amdgpu: amdgpu_atombios_get_gfx_info failed");
+		// 	return ret;
+		// }
+		adev->gfx.config.max_shader_engines = 4;
+		adev->gfx.config.max_tile_pipes = 8;
+		adev->gfx.config.max_cu_per_sh = 8;
+		adev->gfx.config.max_sh_per_se = 1;
+		adev->gfx.config.max_backends_per_se = 2;
+		adev->gfx.config.max_texture_channel_caches = 8;
 		adev->gfx.config.max_gprs = 256;
 		adev->gfx.config.max_gs_threads = 32;
 		adev->gfx.config.max_hw_contexts = 8;
@@ -1902,6 +1916,8 @@ static int gfx_v8_0_sw_init(void *handle)
 	struct amdgpu_ring *ring;
 	struct amdgpu_device *adev = (struct amdgpu_device *)handle;
 
+	DRM_INFO("amdgpu: gfx_v8_0_sw_init");
+
 	switch (adev->asic_type) {
 	case CHIP_TONGA:
 	case CHIP_CARRIZO:
@@ -1924,30 +1940,34 @@ static int gfx_v8_0_sw_init(void *handle)
 
 	/* EOP Event */
 	r = amdgpu_irq_add_id(adev, AMDGPU_IRQ_CLIENTID_LEGACY, VISLANDS30_IV_SRCID_CP_END_OF_PIPE, &adev->gfx.eop_irq);
-	if (r)
-	DRM_ERROR("amdgpu: EOP Event failed");
+	if (r) {
+		DRM_ERROR("amdgpu: EOP Event failed");
 		return r;
+	}
 
 	/* Privileged reg */
 	r = amdgpu_irq_add_id(adev, AMDGPU_IRQ_CLIENTID_LEGACY, VISLANDS30_IV_SRCID_CP_PRIV_REG_FAULT,
 			      &adev->gfx.priv_reg_irq);
-	if (r)
-	DRM_ERROR("amdgpu: Privileged reg failed");
+	if (r) {
+		DRM_ERROR("amdgpu: Privileged reg failed");
 		return r;
+	}
 
 	/* Privileged inst */
 	r = amdgpu_irq_add_id(adev, AMDGPU_IRQ_CLIENTID_LEGACY, VISLANDS30_IV_SRCID_CP_PRIV_INSTR_FAULT,
 			      &adev->gfx.priv_inst_irq);
-	if (r)
-	DRM_ERROR("amdgpu: Privileged inst failed");
+	if (r) {
+		DRM_ERROR("amdgpu: Privileged inst failed");
 		return r;
+	}
 
 	/* Add CP EDC/ECC irq  */
 	r = amdgpu_irq_add_id(adev, AMDGPU_IRQ_CLIENTID_LEGACY, VISLANDS30_IV_SRCID_CP_ECC_ERROR,
 			      &adev->gfx.cp_ecc_error_irq);
-	if (r)
-	DRM_ERROR("amdgpu: Add CP EDC/ECC irq failed");
+	if (r) {
+		DRM_ERROR("amdgpu: Add CP EDC/ECC irq failed");
 		return r;
+	}
 
 	/* SQ interrupts. */
 	r = amdgpu_irq_add_id(adev, AMDGPU_IRQ_CLIENTID_LEGACY, VISLANDS30_IV_SRCID_SQ_INTERRUPT_MSG,
@@ -1993,9 +2013,10 @@ static int gfx_v8_0_sw_init(void *handle)
 		r = amdgpu_ring_init(adev, ring, 1024, &adev->gfx.eop_irq,
 				     AMDGPU_CP_IRQ_GFX_ME0_PIPE0_EOP,
 				     AMDGPU_RING_PRIO_DEFAULT, NULL);
-		if (r)
+		if (r) {
 		DRM_ERROR("amdgpu: set up the gfx ring failed");
 			return r;
+		}
 	}
 
 
@@ -2011,9 +2032,10 @@ static int gfx_v8_0_sw_init(void *handle)
 				r = gfx_v8_0_compute_ring_init(adev,
 								ring_id,
 								i, k, j);
-				if (r)
+				if (r) {
 				DRM_ERROR("amdgpu: set up the gfx ring 2 failed");
 					return r;
+				}
 
 				ring_id++;
 			}
@@ -2027,22 +2049,25 @@ static int gfx_v8_0_sw_init(void *handle)
 	}
 
 	r = amdgpu_gfx_kiq_init_ring(adev, xcc_id);
-	if (r)
-	DRM_ERROR("amdgpu: amdgpu_gfx_kiq_init_ring failed");
+	if (r) {
+		DRM_ERROR("amdgpu: amdgpu_gfx_kiq_init_ring failed");
 		return r;
+	}
 
 	/* create MQD for all compute queues as well as KIQ for SRIOV case */
 	r = amdgpu_gfx_mqd_sw_init(adev, sizeof(struct vi_mqd_allocation), 0);
-	if (r)
-	DRM_ERROR("amdgpu: amdgpu_gfx_mqd_sw_init failed");
+	if (r) {
+		DRM_ERROR("amdgpu: amdgpu_gfx_mqd_sw_init failed");
 		return r;
+	}
 
 	adev->gfx.ce_ram_size = 0x8000;
 
 	r = gfx_v8_0_gpu_early_init(adev);
-	if (r)
-	DRM_ERROR("amdgpu: gfx_v8_0_gpu_early_init failed");
+	if (r) {
+		DRM_ERROR("amdgpu: gfx_v8_0_gpu_early_init failed");
 		return r;
+	}
 
 	return 0;
 }
@@ -3597,6 +3622,7 @@ gfx_v8_0_write_harvested_raster_configs(struct amdgpu_device *adev,
 
 static void gfx_v8_0_setup_rb(struct amdgpu_device *adev)
 {
+	DRM_INFO("amdgpu: gfx_v8_0_setup_rb begin");
 	int i, j;
 	u32 data;
 	u32 raster_config = 0, raster_config_1 = 0;
@@ -3605,6 +3631,7 @@ static void gfx_v8_0_setup_rb(struct amdgpu_device *adev)
 					adev->gfx.config.max_sh_per_se;
 	unsigned num_rb_pipes;
 
+	DRM_INFO("amdgpu: gfx_v8_0_setup_rb pre mutex");
 	mutex_lock(&adev->grbm_idx_mutex);
 	for (i = 0; i < adev->gfx.config.max_shader_engines; i++) {
 		for (j = 0; j < adev->gfx.config.max_sh_per_se; j++) {
@@ -3614,6 +3641,7 @@ static void gfx_v8_0_setup_rb(struct amdgpu_device *adev)
 					       rb_bitmap_width_per_sh);
 		}
 	}
+	DRM_INFO("amdgpu: gfx_v8_0_select_se_sh");
 	gfx_v8_0_select_se_sh(adev, 0xffffffff, 0xffffffff, 0xffffffff, 0);
 
 	adev->gfx.config.backend_enable_mask = active_rbs;
@@ -3622,6 +3650,7 @@ static void gfx_v8_0_setup_rb(struct amdgpu_device *adev)
 	num_rb_pipes = min_t(unsigned, adev->gfx.config.max_backends_per_se *
 			     adev->gfx.config.max_shader_engines, 16);
 
+	DRM_INFO("amdgpu: gfx_v8_0_raster_config");
 	gfx_v8_0_raster_config(adev, &raster_config, &raster_config_1);
 
 	if (!adev->gfx.config.backend_enable_mask ||
@@ -3648,6 +3677,7 @@ static void gfx_v8_0_setup_rb(struct amdgpu_device *adev)
 				RREG32(mmPA_SC_RASTER_CONFIG_1);
 		}
 	}
+	DRM_INFO("amdgpu: gfx_v8_0_select_se_sh");
 	gfx_v8_0_select_se_sh(adev, 0xffffffff, 0xffffffff, 0xffffffff, 0);
 	mutex_unlock(&adev->grbm_idx_mutex);
 }
@@ -3745,9 +3775,13 @@ static void gfx_v8_0_constants_init(struct amdgpu_device *adev)
 	WREG32(mmHDP_ADDR_CONFIG, adev->gfx.config.gb_addr_config);
 	WREG32(mmDMIF_ADDR_CALC, adev->gfx.config.gb_addr_config);
 
+	DRM_INFO("amdgpu: gfx_v8_0_tiling_mode_table_init");
 	gfx_v8_0_tiling_mode_table_init(adev);
+	DRM_INFO("amdgpu: gfx_v8_0_setup_rb");
 	gfx_v8_0_setup_rb(adev);
+	DRM_INFO("amdgpu: gfx_v8_0_get_cu_info");
 	gfx_v8_0_get_cu_info(adev);
+	DRM_INFO("amdgpu: gfx_v8_0_config_init");
 	gfx_v8_0_config_init(adev);
 
 	/* XXX SH_MEM regs */
@@ -3787,7 +3821,9 @@ static void gfx_v8_0_constants_init(struct amdgpu_device *adev)
 	vi_srbm_select(adev, 0, 0, 0, 0);
 	mutex_unlock(&adev->srbm_mutex);
 
+	DRM_INFO("amdgpu: gfx_v8_0_init_compute_vmid");
 	gfx_v8_0_init_compute_vmid(adev);
+	DRM_INFO("amdgpu: gfx_v8_0_init_gds_vmid");
 	gfx_v8_0_init_gds_vmid(adev);
 
 	mutex_lock(&adev->grbm_idx_mutex);
@@ -3815,7 +3851,7 @@ static void gfx_v8_0_constants_init(struct amdgpu_device *adev)
 	WREG32(mmSPI_ARB_PRIORITY, tmp);
 
 	mutex_unlock(&adev->grbm_idx_mutex);
-
+	DRM_INFO("amdgpu: gfx_v8_0_constants_init done");
 }
 
 static void gfx_v8_0_wait_for_rlc_serdes(struct amdgpu_device *adev)
@@ -4798,13 +4834,21 @@ static int gfx_v8_0_hw_init(void *handle)
 	int r;
 	struct amdgpu_device *adev = (struct amdgpu_device *)handle;
 
+	DRM_INFO("amdgpu: gfx_v8_0_hw_init");
+
+	DRM_INFO("amdgpu: gfx_v8_0_init_golden_registers");
 	gfx_v8_0_init_golden_registers(adev);
+	DRM_INFO("amdgpu: gfx_v8_0_constants_init");
 	gfx_v8_0_constants_init(adev);
 
+	DRM_INFO("amdgpu: pre-resume");
 	r = adev->gfx.rlc.funcs->resume(adev);
-	if (r)
+	if (r) {
+		DRM_ERROR("amdgpu: pre-resume failed");
 		return r;
+	}
 
+	DRM_INFO("amdgpu: gfx_v8_0_cp_resume");
 	r = gfx_v8_0_cp_resume(adev);
 
 	return r;
@@ -4816,8 +4860,9 @@ static int gfx_v8_0_kcq_disable(struct amdgpu_device *adev)
 	struct amdgpu_ring *kiq_ring = &adev->gfx.kiq[0].ring;
 
 	r = amdgpu_ring_alloc(kiq_ring, 6 * adev->gfx.num_compute_rings);
-	if (r)
+	if (r) {
 		DRM_ERROR("Failed to lock KIQ (%d).\n", r);
+	}
 
 	for (i = 0; i < adev->gfx.num_compute_rings; i++) {
 		struct amdgpu_ring *ring = &adev->gfx.compute_ring[i];
@@ -4841,8 +4886,9 @@ static int gfx_v8_0_kcq_disable(struct amdgpu_device *adev)
 	 * processed successfully before returning.
 	 */
 	r = amdgpu_ring_test_helper(kiq_ring);
-	if (r)
+	if (r) {
 		DRM_ERROR("KCQ disable failed\n");
+	}
 
 	return r;
 }
@@ -6914,13 +6960,15 @@ static int gfx_v8_0_reset_kgq(struct amdgpu_ring *ring, unsigned int vmid)
 	u32 tmp;
 	int r;
 
-	if (amdgpu_sriov_vf(adev))
+	if (amdgpu_sriov_vf(adev)) {
 		DRM_INFO("amdgpu: gfx_v8_0_reset_kgq failed");
 		return -EINVAL;
+	}
 
-	if (!kiq->pmf || !kiq->pmf->kiq_unmap_queues)
+	if (!kiq->pmf || !kiq->pmf->kiq_unmap_queues) {
 		DRM_INFO("amdgpu: gfx_v8_0_reset_kgq 2 failed");
 		return -EINVAL;
+	}
 
 	spin_lock_irqsave(&kiq->ring_lock, flags);
 

@@ -821,6 +821,7 @@ static int sdma_v3_0_ring_test_ring(struct amdgpu_ring *ring)
 	if (r)
 		goto error_free_wb;
 
+	//it says ring is broken but it works fine on gfx7 :think:
 	amdgpu_ring_write(ring, SDMA_PKT_HEADER_OP(SDMA_OP_WRITE) |
 			  SDMA_PKT_HEADER_SUB_OP(SDMA_SUBOP_WRITE_LINEAR));
 	amdgpu_ring_write(ring, lower_32_bits(gpu_addr));
@@ -836,8 +837,10 @@ static int sdma_v3_0_ring_test_ring(struct amdgpu_ring *ring)
 		udelay(1);
 	}
 
-	if (i >= adev->usec_timeout)
+	if (i >= adev->usec_timeout) {
+		DRM_INFO("amdgpu: ring usec timeout failed");
 		r = -ETIMEDOUT;
+	}
 
 error_free_wb:
 	amdgpu_device_wb_free(adev, index);

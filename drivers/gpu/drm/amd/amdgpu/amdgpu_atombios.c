@@ -716,6 +716,8 @@ int amdgpu_atombios_get_gfx_info(struct amdgpu_device *adev)
 	uint8_t frev, crev;
 	uint16_t data_offset;
 	int ret = -EINVAL;
+	
+	DRM_INFO("amdgpu: amdgpu_atombios_get_gfx_info");
 
 	if (amdgpu_atom_parse_data_header(mode_info->atom_context, index, NULL,
 				   &frev, &crev, &data_offset)) {
@@ -730,6 +732,13 @@ int amdgpu_atombios_get_gfx_info(struct amdgpu_device *adev)
 		adev->gfx.config.max_texture_channel_caches =
 			gfx_info->info.max_texture_channel_caches;
 
+		DRM_INFO("amdgpu: max_shader_engines: %d", adev->gfx.config.max_shader_engines);
+		DRM_INFO("amdgpu: max_tile_pipes: %d", adev->gfx.config.max_tile_pipes);
+		DRM_INFO("amdgpu: max_cu_per_sh: %d", adev->gfx.config.max_cu_per_sh);
+		DRM_INFO("amdgpu: max_sh_per_se: %d", adev->gfx.config.max_sh_per_se);
+		DRM_INFO("amdgpu: max_backends_per_se: %d", adev->gfx.config.max_backends_per_se);
+		DRM_INFO("amdgpu: max_texture_channel_caches: %d", adev->gfx.config.max_texture_channel_caches);
+		
 		ret = 0;
 	}
 	return ret;

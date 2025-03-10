@@ -619,21 +619,25 @@ int amdgpu_irq_get(struct amdgpu_device *adev, struct amdgpu_irq_src *src,
 int amdgpu_irq_put(struct amdgpu_device *adev, struct amdgpu_irq_src *src,
 		   unsigned int type)
 {
-	if (!adev->irq.installed)
+	if (!adev->irq.installed) {
 		DRM_INFO("amdgpu: irq.installed failed");
 		return -ENOENT;
+	}
 
-	if (type >= src->num_types)
+	if (type >= src->num_types) {
 		DRM_INFO("amdgpu: src->num_types failed");
 		return -EINVAL;
+	}
 
-	if (!src->enabled_types || !src->funcs->set)
+	if (!src->enabled_types || !src->funcs->set) {
 		DRM_INFO("amdgpu: enabled_types failed");
 		return -EINVAL;
+	}
 
-	if (WARN_ON(!amdgpu_irq_enabled(adev, src, type)))
+	if (WARN_ON(!amdgpu_irq_enabled(adev, src, type))) {
 		DRM_INFO("amdgpu: amdgpu_irq_enabled failed");
 		return -EINVAL;
+	}
 
 	if (atomic_dec_and_test(&src->enabled_types[type]))
 		return amdgpu_irq_update(adev, src, type);
