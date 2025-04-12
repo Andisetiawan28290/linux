@@ -258,6 +258,7 @@ static int gmc_v8_0_init_microcode(struct amdgpu_device *adev)
 	case CHIP_CARRIZO:
 	case CHIP_STONEY:
 	case CHIP_VEGAM:
+	case CHIP_GLADIUS:
 		return 0;
 	default:
 		return -EINVAL;

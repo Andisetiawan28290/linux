@@ -236,9 +236,9 @@ int amdgpu_uvd_sw_init(struct amdgpu_device *adev)
 	case CHIP_STONEY:
 		fw_name = FIRMWARE_STONEY;
 		break;
-	// case CHIP_GLADIUS:
-	// 	fw_name = FIRMWARE_GLADIUS;
-	// 	break;
+	case CHIP_GLADIUS:
+		fw_name = FIRMWARE_GLADIUS;
+		break;
 	case CHIP_POLARIS10:
 		fw_name = FIRMWARE_POLARIS10;
 		break;

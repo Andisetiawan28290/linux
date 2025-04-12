@@ -61,6 +61,8 @@ MODULE_FIRMWARE("amdgpu/carrizo_sdma1.bin");
 MODULE_FIRMWARE("amdgpu/fiji_sdma.bin");
 MODULE_FIRMWARE("amdgpu/fiji_sdma1.bin");
 MODULE_FIRMWARE("amdgpu/stoney_sdma.bin");
+MODULE_FIRMWARE("amdgpu/gladius_sdma.bin");
+MODULE_FIRMWARE("amdgpu/gladius_sdma1.bin");
 MODULE_FIRMWARE("amdgpu/polaris10_sdma.bin");
 MODULE_FIRMWARE("amdgpu/polaris10_sdma1.bin");
 MODULE_FIRMWARE("amdgpu/polaris11_sdma.bin");
