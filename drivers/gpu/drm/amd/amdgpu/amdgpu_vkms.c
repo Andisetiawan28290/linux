@@ -584,6 +584,7 @@ static int amdgpu_vkms_hw_init(void *handle)
 		break;
 	case CHIP_CARRIZO:
 	case CHIP_STONEY:
+	case CHIP_GLADIUS:
 	case CHIP_POLARIS10:
 	case CHIP_POLARIS11:
 	case CHIP_VEGAM:

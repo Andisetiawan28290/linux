@@ -144,6 +144,15 @@ static void gmc_v8_0_init_golden_registers(struct amdgpu_device *adev)
 							golden_settings_polaris11_a11,
 							ARRAY_SIZE(golden_settings_polaris11_a11));
 		break;
+	case CHIP_GLADIUS:
+		//unsure if needed.
+		// amdgpu_device_program_register_sequence(adev,
+		// 					gladius_mgcg_cgcg_init,
+		// 					ARRAY_SIZE(gladius_mgcg_cgcg_init));
+		amdgpu_device_program_register_sequence(adev,
+							golden_settings_polaris10_a11,
+							ARRAY_SIZE(golden_settings_polaris10_a11));
+		break;
 	case CHIP_POLARIS10:
 		amdgpu_device_program_register_sequence(adev,
 							golden_settings_polaris10_a11,

@@ -131,6 +131,13 @@ MODULE_FIRMWARE("amdgpu/fiji_mec.bin");
 MODULE_FIRMWARE("amdgpu/fiji_mec2.bin");
 MODULE_FIRMWARE("amdgpu/fiji_rlc.bin");
 
+MODULE_FIRMWARE("amdgpu/gladius_ce.bin");
+MODULE_FIRMWARE("amdgpu/gladius_pfp.bin");
+MODULE_FIRMWARE("amdgpu/gladius_me.bin");
+MODULE_FIRMWARE("amdgpu/gladius_mec.bin");
+MODULE_FIRMWARE("amdgpu/gladius_mec2.bin");
+MODULE_FIRMWARE("amdgpu/gladius_rlc.bin");
+
 MODULE_FIRMWARE("amdgpu/polaris10_ce.bin");
 MODULE_FIRMWARE("amdgpu/polaris10_ce_2.bin");
 MODULE_FIRMWARE("amdgpu/polaris10_pfp.bin");
@@ -366,6 +373,53 @@ static const u32 polaris11_golden_common_all[] =
 	mmSPI_RESOURCE_RESERVE_EN_CU_0, 0xffffffff, 0x00FF7FBF,
 	mmSPI_RESOURCE_RESERVE_EN_CU_1, 0xffffffff, 0x00FF7FAF,
 };
+
+static const u32 golden_settings_gladius_a11[] =
+{
+	mmATC_MISC_CG, 0x000c0fc0, 0x000c0200,
+	mmCB_HW_CONTROL, 0x0001f3cf, 0x00007208,
+	mmCB_HW_CONTROL_2, 0x0f000000, 0x0f000000,
+	mmCB_HW_CONTROL_3, 0x000001ff, 0x00000040,
+	mmDB_DEBUG2, 0xf00fffff, 0x00000400,
+	mmPA_SC_ENHANCE, 0xffffffff, 0x20000001,
+	mmPA_SC_LINE_STIPPLE_STATE, 0x0000ff0f, 0x00000000,
+	mmPA_SC_RASTER_CONFIG, 0x3f3fffff, 0x2a00161a,		//different from polaris10. closest is fiji with 0x3a00161a
+	mmPA_SC_RASTER_CONFIG_1, 0x0000003f, 0x0000002e,	//is this correct? polaris10 is 0x0000002a
+	mmRLC_CGCG_CGLS_CTRL, 0x00000003, 0x0010003c,		//unsure. lets keep polaris10
+	mmRLC_CGCG_CGLS_CTRL_3D, 0xffffffff, 0x0001003c,
+	mmSQ_CONFIG, 0x07f80000, 0x07180000,
+	mmTA_CNTL_AUX, 0x000f000f, 0x000b0000,
+	mmTCC_CTRL, 0x00100000, 0xf31fff7f,
+	mmTCP_ADDR_CONFIG, 0x000003ff, 0x000000f7,
+	mmTCP_CHAN_STEER_HI, 0xffffffff, 0x00000000,
+	mmVGT_RESET_DEBUG, 0x00000004, 0x00000004,
+};
+
+static const u32 gladius_golden_common_all[] =
+{
+	mmGRBM_GFX_INDEX, 0xffffffff, 0xe0000000,
+	mmPA_SC_RASTER_CONFIG, 0xffffffff, 0x2a00161a,		//different from polaris10
+	mmPA_SC_RASTER_CONFIG_1, 0xffffffff, 0x0000002e,	//same as above
+	mmGB_ADDR_CONFIG, 0xffffffff, 0x22011003,			//also unsure
+	mmSPI_RESOURCE_RESERVE_CU_0, 0xffffffff, 0x00000800,
+	mmSPI_RESOURCE_RESERVE_CU_1, 0xffffffff, 0x00000800,
+	mmSPI_RESOURCE_RESERVE_EN_CU_0, 0xffffffff, 0x00FF7FBF,
+	mmSPI_RESOURCE_RESERVE_EN_CU_1, 0xffffffff, 0x00FF7FAF,
+	mmVM_CONTEXTS_DISABLE, 0xffffffff, 0x00000000,		//not present on polaris10
+};
+
+//is this needed? none of the newer cards use mgcg_cgcg_init
+// static const u32 gladius_mgcg_cgcg_init[] =
+// {
+// 	0x0000313a, 0xffffffff, 0x00000003,
+// 	0x00003079, 0xffffffff, 0x00020201,
+// 	0x00003108, 0xffffffff, 0xfffffffd,
+// 	0x0000c200, 0xffffffff, 0xe0000000,
+// 	0x0000311d, 0xffffffff, 0xffffffff,
+// 	0x0000311e, 0xffffffff, 0xffffffff,
+// 	0x0000311f, 0xffffffff, 0x004000ff,
+// 	0x0000313a, 0xffffffff, 0x00000001,
+// };
 
 static const u32 golden_settings_polaris10_a11[] =
 {
@@ -810,6 +864,17 @@ static void gfx_v8_0_init_golden_registers(struct amdgpu_device *adev)
 			amdgpu_atombios_i2c_channel_trans(adev, 0x10, 0x96, 0x1F, 0xD0);
 		}
 		break;
+	case CHIP_GLADIUS:
+		// amdgpu_device_program_register_sequence(adev,
+		// 					gladius_mgcg_cgcg_init,
+		// 					ARRAY_SIZE(gladius_mgcg_cgcg_init));
+		amdgpu_device_program_register_sequence(adev,
+							golden_settings_gladius_a11,
+							ARRAY_SIZE(golden_settings_gladius_a11));
+		amdgpu_device_program_register_sequence(adev,
+							gladius_golden_common_all,
+							ARRAY_SIZE(gladius_golden_common_all));
+		break;
 	case CHIP_CARRIZO:
 		amdgpu_device_program_register_sequence(adev,
 							cz_mgcg_cgcg_init,
@@ -968,6 +1033,9 @@ static int gfx_v8_0_init_microcode(struct amdgpu_device *adev)
 		break;
 	case CHIP_STONEY:
 		chip_name = "stoney";
+		break;
+	case CHIP_GLADIUS:
+		chip_name = "gladius";
 		break;
 	case CHIP_POLARIS10:
 		chip_name = "polaris10";
@@ -1709,21 +1777,28 @@ static int gfx_v8_0_gpu_early_init(struct amdgpu_device *adev)
 		adev->gfx.config.sc_earlyz_tile_fifo_size = 0x130;
 		gb_addr_config = POLARIS11_GB_ADDR_CONFIG_GOLDEN;
 		break;
-	case CHIP_POLARIS10:
-	case CHIP_VEGAM:
-		// ps4patches: does not work on ps4 pro
-		// lets copy values from Tonga for now
-		// ret = amdgpu_atombios_get_gfx_info(adev);
-		// if (ret) {
-		// 	DRM_ERROR("amdgpu: amdgpu_atombios_get_gfx_info failed");
-		// 	return ret;
-		// }
+	case CHIP_GLADIUS:
 		adev->gfx.config.max_shader_engines = 4;
 		adev->gfx.config.max_tile_pipes = 8;
 		adev->gfx.config.max_cu_per_sh = 8;
 		adev->gfx.config.max_sh_per_se = 1;
 		adev->gfx.config.max_backends_per_se = 2;
 		adev->gfx.config.max_texture_channel_caches = 8;
+		adev->gfx.config.max_gprs = 256;
+		adev->gfx.config.max_gs_threads = 32;
+		adev->gfx.config.max_hw_contexts = 8;
+
+		adev->gfx.config.sc_prim_fifo_size_frontend = 0x20;
+		adev->gfx.config.sc_prim_fifo_size_backend = 0x100;
+		adev->gfx.config.sc_hiz_tile_fifo_size = 0x30;
+		adev->gfx.config.sc_earlyz_tile_fifo_size = 0x130;
+		gb_addr_config = TONGA_GB_ADDR_CONFIG_GOLDEN;
+		break;
+	case CHIP_POLARIS10:
+	case CHIP_VEGAM:
+		ret = amdgpu_atombios_get_gfx_info(adev);
+		if (ret)
+			return ret;
 		adev->gfx.config.max_gprs = 256;
 		adev->gfx.config.max_gs_threads = 32;
 		adev->gfx.config.max_hw_contexts = 8;
@@ -1922,6 +1997,7 @@ static int gfx_v8_0_sw_init(void *handle)
 	case CHIP_TONGA:
 	case CHIP_CARRIZO:
 	case CHIP_FIJI:
+	case CHIP_GLADIUS:
 	case CHIP_POLARIS10:
 	case CHIP_POLARIS11:
 	case CHIP_POLARIS12:
@@ -2873,6 +2949,7 @@ static void gfx_v8_0_tiling_mode_table_init(struct amdgpu_device *adev)
 
 		break;
 	case CHIP_POLARIS10:
+	case CHIP_GLADIUS:
 		modearray[0] = (ARRAY_MODE(ARRAY_2D_TILED_THIN1) |
 				PIPE_CONFIG(ADDR_SURF_P8_32x32_16x16) |
 				TILE_SPLIT(ADDR_SURF_TILE_SPLIT_64B) |
@@ -3489,6 +3566,10 @@ gfx_v8_0_raster_config(struct amdgpu_device *adev, u32 *rconf, u32 *rconf1)
 			  SE_XSEL(1) | SE_YSEL(1);
 		*rconf1 |= SE_PAIR_MAP(2) | SE_PAIR_XSEL(2) |
 			   SE_PAIR_YSEL(2);
+		break;
+	case CHIP_GLADIUS:
+		*rconf |= 0x2a00161a;
+		*rconf1 |= 0x0000002e;
 		break;
 	case CHIP_TOPAZ:
 	case CHIP_CARRIZO:
@@ -6055,6 +6136,7 @@ static int gfx_v8_0_set_clockgating_state(void *handle,
 	case CHIP_TONGA:
 		gfx_v8_0_tonga_update_gfx_clock_gating(adev, state);
 		break;
+	case CHIP_GLADIUS:
 	case CHIP_POLARIS10:
 	case CHIP_POLARIS11:
 	case CHIP_POLARIS12:

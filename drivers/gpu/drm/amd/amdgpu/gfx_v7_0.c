@@ -97,13 +97,6 @@ MODULE_FIRMWARE("amdgpu/liverpool_rlc.bin");
 MODULE_FIRMWARE("amdgpu/liverpool_mec.bin");
 MODULE_FIRMWARE("amdgpu/liverpool_mec2.bin");
 
-MODULE_FIRMWARE("amdgpu/gladius_pfp.bin");
-MODULE_FIRMWARE("amdgpu/gladius_me.bin");
-MODULE_FIRMWARE("amdgpu/gladius_ce.bin");
-MODULE_FIRMWARE("amdgpu/gladius_rlc.bin");
-MODULE_FIRMWARE("amdgpu/gladius_mec.bin");
-MODULE_FIRMWARE("amdgpu/gladius_mec2.bin");
-
 static const struct amdgpu_gds_reg_offset amdgpu_gds_reg_offset[] = {
 	{mmGDS_VMID0_BASE, mmGDS_VMID0_SIZE, mmGDS_GWS_VMID0, mmGDS_OA_VMID0},
 	{mmGDS_VMID1_BASE, mmGDS_VMID1_SIZE, mmGDS_GWS_VMID1, mmGDS_OA_VMID1},

@@ -2524,6 +2524,7 @@ static int amdgpu_device_ip_early_init(struct amdgpu_device *adev)
 	case CHIP_TOPAZ:
 	case CHIP_TONGA:
 	case CHIP_FIJI:
+	case CHIP_GLADIUS:
 	case CHIP_POLARIS10:
 	case CHIP_POLARIS11:
 	case CHIP_POLARIS12:
@@ -6613,6 +6614,7 @@ bool amdgpu_device_has_display_hardware(struct amdgpu_device *adev)
 #endif
 	case CHIP_TONGA:
 	case CHIP_FIJI:
+	case CHIP_GLADIUS:
 	case CHIP_POLARIS10:
 	case CHIP_POLARIS11:
 	case CHIP_POLARIS12:

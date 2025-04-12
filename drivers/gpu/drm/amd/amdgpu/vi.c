@@ -270,6 +270,7 @@ static int vi_query_video_codecs(struct amdgpu_device *adev, bool encode,
 		else
 			*codecs = &tonga_video_codecs_decode;
 		return 0;
+	case CHIP_GLADIUS:
 	case CHIP_POLARIS10:
 	case CHIP_POLARIS11:
 	case CHIP_POLARIS12:
@@ -518,6 +519,12 @@ static void vi_init_golden_registers(struct amdgpu_device *adev)
 		amdgpu_device_program_register_sequence(adev,
 							stoney_mgcg_cgcg_init,
 							ARRAY_SIZE(stoney_mgcg_cgcg_init));
+		break;
+	case CHIP_GLADIUS:
+		//unsure
+		// amdgpu_device_program_register_sequence(adev,
+		// 					gladius_mgcg_cgcg_init,
+		// 					ARRAY_SIZE(gladius_mgcg_cgcg_init));
 		break;
 	case CHIP_POLARIS10:
 	case CHIP_POLARIS11:
@@ -928,6 +935,7 @@ vi_asic_reset_method(struct amdgpu_device *adev)
 	switch (adev->asic_type) {
 	case CHIP_FIJI:
 	case CHIP_TONGA:
+	case CHIP_GLADIUS:
 	case CHIP_POLARIS10:
 	case CHIP_POLARIS11:
 	case CHIP_POLARIS12:
@@ -1546,6 +1554,29 @@ static int vi_common_early_init(void *handle)
 		adev->pg_flags = 0;
 		adev->external_rev_id = adev->rev_id + 0x5A;
 		break;
+	case CHIP_GLADIUS:
+		adev->cg_flags = AMD_CG_SUPPORT_GFX_MGCG |
+			AMD_CG_SUPPORT_GFX_RLC_LS |
+			AMD_CG_SUPPORT_GFX_CP_LS |
+			AMD_CG_SUPPORT_GFX_CGCG |
+			AMD_CG_SUPPORT_GFX_CGLS |
+			AMD_CG_SUPPORT_GFX_3D_CGCG |
+			AMD_CG_SUPPORT_GFX_3D_CGLS |
+			AMD_CG_SUPPORT_SDMA_MGCG |
+			AMD_CG_SUPPORT_SDMA_LS |
+			AMD_CG_SUPPORT_BIF_MGCG |
+			AMD_CG_SUPPORT_BIF_LS |
+			AMD_CG_SUPPORT_HDP_MGCG |
+			AMD_CG_SUPPORT_HDP_LS |
+			AMD_CG_SUPPORT_ROM_MGCG |
+			AMD_CG_SUPPORT_MC_MGCG |
+			AMD_CG_SUPPORT_MC_LS |
+			AMD_CG_SUPPORT_DRM_LS |
+			AMD_CG_SUPPORT_UVD_MGCG |
+			AMD_CG_SUPPORT_VCE_MGCG;
+		adev->pg_flags = 0;
+		adev->external_rev_id = adev->rev_id + 0x71;
+		break;
 	case CHIP_POLARIS10:
 		adev->cg_flags = AMD_CG_SUPPORT_GFX_MGCG |
 			AMD_CG_SUPPORT_GFX_RLC_LS |
@@ -2132,6 +2163,7 @@ int vi_set_ip_blocks(struct amdgpu_device *adev)
 			amdgpu_device_ip_block_add(adev, &vce_v3_0_ip_block);
 		}
 		break;
+	case CHIP_GLADIUS:
 	case CHIP_POLARIS10:
 	case CHIP_POLARIS11:
 	case CHIP_POLARIS12:

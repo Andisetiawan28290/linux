@@ -281,6 +281,9 @@ static int sdma_v3_0_init_microcode(struct amdgpu_device *adev)
 	case CHIP_FIJI:
 		chip_name = "fiji";
 		break;
+	case CHIP_GLADIUS:
+		chip_name = "gladius";
+		break;
 	case CHIP_POLARIS10:
 		chip_name = "polaris10";
 		break;

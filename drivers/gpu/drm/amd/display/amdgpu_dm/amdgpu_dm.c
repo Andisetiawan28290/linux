@@ -2264,6 +2264,7 @@ static int load_dmcu_fw(struct amdgpu_device *adev)
 	case CHIP_FIJI:
 	case CHIP_CARRIZO:
 	case CHIP_STONEY:
+	case CHIP_GLADIUS:
 	case CHIP_POLARIS11:
 	case CHIP_POLARIS10:
 	case CHIP_POLARIS12:
@@ -5106,6 +5107,7 @@ static int amdgpu_dm_initialize_drm_device(struct amdgpu_device *adev)
 	case CHIP_FIJI:
 	case CHIP_CARRIZO:
 	case CHIP_STONEY:
+	case CHIP_GLADIUS:
 	case CHIP_POLARIS11:
 	case CHIP_POLARIS10:
 	case CHIP_POLARIS12:
@@ -5357,6 +5359,7 @@ static int dm_early_init(void *handle)
 		adev->mode_info.num_hpd = 5;
 		adev->mode_info.num_dig = 5;
 		break;
+	case CHIP_GLADIUS:
 	case CHIP_POLARIS10:
 	case CHIP_VEGAM:
 		adev->mode_info.num_crtc = 6;

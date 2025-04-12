@@ -52,6 +52,7 @@
 #define FIRMWARE_CARRIZO	"amdgpu/carrizo_vce.bin"
 #define FIRMWARE_FIJI		"amdgpu/fiji_vce.bin"
 #define FIRMWARE_STONEY		"amdgpu/stoney_vce.bin"
+#define FIRMWARE_GLADIUS	"amdgpu/gladius_vce.bin"
 #define FIRMWARE_POLARIS10	"amdgpu/polaris10_vce.bin"
 #define FIRMWARE_POLARIS11	"amdgpu/polaris11_vce.bin"
 #define FIRMWARE_POLARIS12	"amdgpu/polaris12_vce.bin"
@@ -132,6 +133,9 @@ int amdgpu_vce_sw_init(struct amdgpu_device *adev, unsigned long size)
 	case CHIP_STONEY:
 		fw_name = FIRMWARE_STONEY;
 		break;
+	// case CHIP_GLADIUS:
+	// 	fw_name = FIRMWARE_GLADIUS;
+	// 	break;
 	case CHIP_POLARIS10:
 		fw_name = FIRMWARE_POLARIS10;
 		break;
