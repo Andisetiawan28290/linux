@@ -385,7 +385,7 @@ static const u32 golden_settings_gladius_a11[] =
 	mmPA_SC_LINE_STIPPLE_STATE, 0x0000ff0f, 0x00000000,
 	mmPA_SC_RASTER_CONFIG, 0x3f3fffff, 0x2a00161a,		//different from polaris10. closest is fiji with 0x3a00161a
 	mmPA_SC_RASTER_CONFIG_1, 0x0000003f, 0x0000002e,	//is this correct? polaris10 is 0x0000002a
-	mmRLC_CGCG_CGLS_CTRL, 0x00000003, 0x0010003c,		//unsure. lets keep polaris10
+	mmRLC_CGCG_CGLS_CTRL, 0x00000003, 0x0001003c,		//unsure. lets keep polaris10
 	mmRLC_CGCG_CGLS_CTRL_3D, 0xffffffff, 0x0001003c,
 	mmSQ_CONFIG, 0x07f80000, 0x07180000,
 	mmTA_CNTL_AUX, 0x000f000f, 0x000b0000,
