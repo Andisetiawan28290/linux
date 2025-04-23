@@ -1279,6 +1279,7 @@ static bool gmc_v8_0_is_idle(void *handle)
 
 static int gmc_v8_0_wait_for_idle(void *handle)
 {
+	DRM_INFO("amdgpu: gmc_v8_0_wait_for_idle");
 	unsigned int i;
 	u32 tmp;
 	struct amdgpu_device *adev = (struct amdgpu_device *)handle;
@@ -1295,6 +1296,7 @@ static int gmc_v8_0_wait_for_idle(void *handle)
 			return 0;
 		udelay(1);
 	}
+	DRM_INFO("amdgpu: gmc_v8_0_wait_for_idle failed");
 	return -ETIMEDOUT;
 
 }

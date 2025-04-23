@@ -905,6 +905,7 @@ static void gfx_v8_0_init_golden_registers(struct amdgpu_device *adev)
 
 static int gfx_v8_0_ring_test_ring(struct amdgpu_ring *ring)
 {
+	DRM_INFO("amdgpu: gfx_v8_0_ring_test_ring");
 	struct amdgpu_device *adev = ring->adev;
 	uint32_t tmp = 0;
 	unsigned i;
@@ -927,14 +928,17 @@ static int gfx_v8_0_ring_test_ring(struct amdgpu_ring *ring)
 		udelay(1);
 	}
 
-	if (i >= adev->usec_timeout)
+	if (i >= adev->usec_timeout) {
+		DRM_INFO("amdgpu: gfx_v8_0_ring_test_ring failed");
 		r = -ETIMEDOUT;
+	}
 
 	return r;
 }
 
 static int gfx_v8_0_ring_test_ib(struct amdgpu_ring *ring, long timeout)
 {
+	DRM_INFO("amdgpu: gfx_v8_0_ring_test_ib");
 	struct amdgpu_device *adev = ring->adev;
 	struct amdgpu_ib ib;
 	struct dma_fence *f = NULL;
@@ -969,6 +973,7 @@ static int gfx_v8_0_ring_test_ib(struct amdgpu_ring *ring, long timeout)
 
 	r = dma_fence_wait_timeout(f, false, timeout);
 	if (r == 0) {
+		DRM_INFO("amdgpu: gfx_v8_0_ring_test_ib failed");
 		r = -ETIMEDOUT;
 		goto err2;
 	} else if (r < 0) {

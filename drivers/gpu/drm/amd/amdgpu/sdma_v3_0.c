@@ -807,6 +807,7 @@ static int sdma_v3_0_start(struct amdgpu_device *adev)
  */
 static int sdma_v3_0_ring_test_ring(struct amdgpu_ring *ring)
 {
+	DRM_INFO("amdgpu: sdma_v3_0_ring_test_ring");
 	struct amdgpu_device *adev = ring->adev;
 	unsigned i;
 	unsigned index;
@@ -863,6 +864,7 @@ error_free_wb:
  */
 static int sdma_v3_0_ring_test_ib(struct amdgpu_ring *ring, long timeout)
 {
+	DRM_INFO("amdgpu: sdma_v3_0_ring_test_ib");
 	struct amdgpu_device *adev = ring->adev;
 	struct amdgpu_ib ib;
 	struct dma_fence *f = NULL;
@@ -901,6 +903,7 @@ static int sdma_v3_0_ring_test_ib(struct amdgpu_ring *ring, long timeout)
 
 	r = dma_fence_wait_timeout(f, false, timeout);
 	if (r == 0) {
+		DRM_INFO("amdgpu: sdma_v3_0_ring_test_ib timeout");
 		r = -ETIMEDOUT;
 		goto err1;
 	} else if (r < 0) {
@@ -1224,6 +1227,7 @@ static bool sdma_v3_0_is_idle(void *handle)
 
 static int sdma_v3_0_wait_for_idle(void *handle)
 {
+	DRM_INFO("amdgpu: sdma_v3_0_wait_for_idle");
 	unsigned i;
 	u32 tmp;
 	struct amdgpu_device *adev = (struct amdgpu_device *)handle;
@@ -1236,6 +1240,7 @@ static int sdma_v3_0_wait_for_idle(void *handle)
 			return 0;
 		udelay(1);
 	}
+	DRM_INFO("amdgpu: sdma_v3_0_wait_for_idle timeout");
 	return -ETIMEDOUT;
 }
 
