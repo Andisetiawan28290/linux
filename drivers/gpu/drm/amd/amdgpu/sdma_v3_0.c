@@ -224,6 +224,7 @@ static void sdma_v3_0_init_golden_registers(struct amdgpu_device *adev)
 							ARRAY_SIZE(golden_settings_polaris11_a11));
 		break;
 	case CHIP_POLARIS10:
+	case CHIP_GLADIUS:
 		amdgpu_device_program_register_sequence(adev,
 							golden_settings_polaris10_a11,
 							ARRAY_SIZE(golden_settings_polaris10_a11));

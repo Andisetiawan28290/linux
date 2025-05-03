@@ -384,8 +384,8 @@ static const u32 golden_settings_gladius_a11[] =
 	mmPA_SC_ENHANCE, 0xffffffff, 0x20000001,
 	mmPA_SC_LINE_STIPPLE_STATE, 0x0000ff0f, 0x00000000,
 	mmPA_SC_RASTER_CONFIG, 0x3f3fffff, 0x2a00161a,		//different from polaris10. closest is fiji with 0x3a00161a
-	mmPA_SC_RASTER_CONFIG_1, 0x0000003f, 0x0000002e,	//is this correct? polaris10 is 0x0000002a
-	mmRLC_CGCG_CGLS_CTRL, 0x00000003, 0x0001003c,		//unsure. lets keep polaris10
+	mmPA_SC_RASTER_CONFIG_1, 0x0000003f, 0x0000002e,	//Same as vegam
+	mmRLC_CGCG_CGLS_CTRL, 0x00000003, 0x0001003c,
 	mmRLC_CGCG_CGLS_CTRL_3D, 0xffffffff, 0x0001003c,
 	mmSQ_CONFIG, 0x07f80000, 0x07180000,
 	mmTA_CNTL_AUX, 0x000f000f, 0x000b0000,
@@ -399,8 +399,8 @@ static const u32 gladius_golden_common_all[] =
 {
 	mmGRBM_GFX_INDEX, 0xffffffff, 0xe0000000,
 	mmPA_SC_RASTER_CONFIG, 0xffffffff, 0x2a00161a,		//different from polaris10
-	mmPA_SC_RASTER_CONFIG_1, 0xffffffff, 0x0000002e,	//same as above
-	mmGB_ADDR_CONFIG, 0xffffffff, 0x22011003,			//also unsure
+	mmPA_SC_RASTER_CONFIG_1, 0xffffffff, 0x0000002e,	//same as vegam
+	mmGB_ADDR_CONFIG, 0xffffffff, 0x22011003,			//same as vegam
 	mmSPI_RESOURCE_RESERVE_CU_0, 0xffffffff, 0x00000800,
 	mmSPI_RESOURCE_RESERVE_CU_1, 0xffffffff, 0x00000800,
 	mmSPI_RESOURCE_RESERVE_EN_CU_0, 0xffffffff, 0x00FF7FBF,
@@ -409,17 +409,17 @@ static const u32 gladius_golden_common_all[] =
 };
 
 //is this needed? none of the newer cards use mgcg_cgcg_init
-// static const u32 gladius_mgcg_cgcg_init[] =
-// {
-// 	0x0000313a, 0xffffffff, 0x00000003,
-// 	0x00003079, 0xffffffff, 0x00020201,
-// 	0x00003108, 0xffffffff, 0xfffffffd,
-// 	0x0000c200, 0xffffffff, 0xe0000000,
-// 	0x0000311d, 0xffffffff, 0xffffffff,
-// 	0x0000311e, 0xffffffff, 0xffffffff,
-// 	0x0000311f, 0xffffffff, 0x004000ff,
-// 	0x0000313a, 0xffffffff, 0x00000001,
-// };
+static const u32 gladius_mgcg_cgcg_init[] =
+{
+	0x0000313a, 0xffffffff, 0x00000003, /* mmRLC_SAFE_MODE */
+	0x00003079, 0xffffffff, 0x00020201,	/* mmCP_MEM_SLP_CNTL */
+	0x00003108, 0xffffffff, 0xfffffffd,	/* mmRLC_CGTT_MGCG_OVERRIDE */
+	0x0000c200, 0xffffffff, 0xe0000000,	/* mmGRBM_GFX_INDEX */
+	0x0000311d, 0xffffffff, 0xffffffff,	/* mmRLC_SERDES_WR_CU_MASTER_MASK */
+	0x0000311e, 0xffffffff, 0xffffffff,	/* mmRLC_SERDES_WR_NONCU_MASTER_MASK */
+	0x0000311f, 0xffffffff, 0x004000ff,	/* mmRLC_SERDES_WR_CTRL */
+	0x0000313a, 0xffffffff, 0x00000001,	/* mmRLC_GPR_REG2 */
+};
 
 static const u32 golden_settings_polaris10_a11[] =
 {
@@ -865,9 +865,9 @@ static void gfx_v8_0_init_golden_registers(struct amdgpu_device *adev)
 		}
 		break;
 	case CHIP_GLADIUS:
-		// amdgpu_device_program_register_sequence(adev,
-		// 					gladius_mgcg_cgcg_init,
-		// 					ARRAY_SIZE(gladius_mgcg_cgcg_init));
+		amdgpu_device_program_register_sequence(adev,
+							gladius_mgcg_cgcg_init,
+							ARRAY_SIZE(gladius_mgcg_cgcg_init));
 		amdgpu_device_program_register_sequence(adev,
 							golden_settings_gladius_a11,
 							ARRAY_SIZE(golden_settings_gladius_a11));
@@ -1801,9 +1801,18 @@ static int gfx_v8_0_gpu_early_init(struct amdgpu_device *adev)
 		break;
 	case CHIP_POLARIS10:
 	case CHIP_VEGAM:
+	#ifdef CONFIG_X86_PS4
+		adev->gfx.config.max_shader_engines = 4;
+		adev->gfx.config.max_tile_pipes = 8;
+		adev->gfx.config.max_cu_per_sh = 8;
+		adev->gfx.config.max_sh_per_se = 1;
+		adev->gfx.config.max_backends_per_se = 2;
+		adev->gfx.config.max_texture_channel_caches = 8;
+	#else
 		ret = amdgpu_atombios_get_gfx_info(adev);
 		if (ret)
 			return ret;
+	#endif
 		adev->gfx.config.max_gprs = 256;
 		adev->gfx.config.max_gs_threads = 32;
 		adev->gfx.config.max_hw_contexts = 8;
@@ -2188,10 +2197,23 @@ static void gfx_v8_0_tiling_mode_table_init(struct amdgpu_device *adev)
 	uint32_t *modearray, *mod2array;
 	const u32 num_tile_mode_states = ARRAY_SIZE(adev->gfx.config.tile_mode_array);
 	const u32 num_secondary_tile_mode_states = ARRAY_SIZE(adev->gfx.config.macrotile_mode_array);
-	u32 reg_offset;
+	u32 reg_offset, split_equal_to_row_size;
 
 	modearray = adev->gfx.config.tile_mode_array;
 	mod2array = adev->gfx.config.macrotile_mode_array;
+
+	switch (adev->gfx.config.mem_row_size_in_kb) {
+	case 1:
+		split_equal_to_row_size = ADDR_SURF_TILE_SPLIT_1KB;
+		break;
+	case 2:
+	default:
+		split_equal_to_row_size = ADDR_SURF_TILE_SPLIT_2KB;
+		break;
+	case 4:
+		split_equal_to_row_size = ADDR_SURF_TILE_SPLIT_4KB;
+		break;
+	}
 
 	for (reg_offset = 0; reg_offset < num_tile_mode_states; reg_offset++)
 		modearray[reg_offset] = 0;
@@ -2954,7 +2976,6 @@ static void gfx_v8_0_tiling_mode_table_init(struct amdgpu_device *adev)
 
 		break;
 	case CHIP_POLARIS10:
-	case CHIP_GLADIUS:
 		modearray[0] = (ARRAY_MODE(ARRAY_2D_TILED_THIN1) |
 				PIPE_CONFIG(ADDR_SURF_P8_32x32_16x16) |
 				TILE_SPLIT(ADDR_SURF_TILE_SPLIT_64B) |
@@ -3327,6 +3348,152 @@ static void gfx_v8_0_tiling_mode_table_init(struct amdgpu_device *adev)
 				WREG32(mmGB_MACROTILE_MODE0 + reg_offset, mod2array[reg_offset]);
 
 		break;
+
+	case CHIP_GLADIUS:
+		modearray[0] = (ARRAY_MODE(ARRAY_2D_TILED_THIN1) |
+				   MICRO_TILE_MODE_NEW(ADDR_SURF_DEPTH_MICRO_TILING) |
+				   PIPE_CONFIG(ADDR_SURF_P8_32x32_16x16) |
+				   TILE_SPLIT(ADDR_SURF_TILE_SPLIT_64B));
+		modearray[1] = (ARRAY_MODE(ARRAY_2D_TILED_THIN1) |
+				   MICRO_TILE_MODE_NEW(ADDR_SURF_DEPTH_MICRO_TILING) |
+				   PIPE_CONFIG(ADDR_SURF_P8_32x32_16x16) |
+				   TILE_SPLIT(ADDR_SURF_TILE_SPLIT_128B));
+		modearray[2] = (ARRAY_MODE(ARRAY_2D_TILED_THIN1) |
+				   MICRO_TILE_MODE_NEW(ADDR_SURF_DEPTH_MICRO_TILING) |
+				   PIPE_CONFIG(ADDR_SURF_P8_32x32_16x16) |
+				   TILE_SPLIT(ADDR_SURF_TILE_SPLIT_256B));
+		modearray[3] = (ARRAY_MODE(ARRAY_2D_TILED_THIN1) |
+				   MICRO_TILE_MODE_NEW(ADDR_SURF_DEPTH_MICRO_TILING) |
+				   PIPE_CONFIG(ADDR_SURF_P8_32x32_16x16) |
+				   TILE_SPLIT(ADDR_SURF_TILE_SPLIT_512B));
+		modearray[4] = (ARRAY_MODE(ARRAY_2D_TILED_THIN1) |
+				   MICRO_TILE_MODE_NEW(ADDR_SURF_DEPTH_MICRO_TILING) |
+				   PIPE_CONFIG(ADDR_SURF_P8_32x32_16x16) |
+				   TILE_SPLIT(split_equal_to_row_size));
+		modearray[5] = (ARRAY_MODE(ARRAY_1D_TILED_THIN1) |
+				   PIPE_CONFIG(ADDR_SURF_P8_32x32_16x16) |
+				   MICRO_TILE_MODE_NEW(ADDR_SURF_DEPTH_MICRO_TILING));
+		modearray[6] = (ARRAY_MODE(ARRAY_PRT_2D_TILED_THIN1) |
+				   MICRO_TILE_MODE_NEW(ADDR_SURF_DEPTH_MICRO_TILING) |
+				   PIPE_CONFIG(ADDR_SURF_P8_32x32_16x16) |
+				   TILE_SPLIT(ADDR_SURF_TILE_SPLIT_256B));
+		modearray[7] = (ARRAY_MODE(ARRAY_PRT_2D_TILED_THIN1) |
+				   MICRO_TILE_MODE_NEW(ADDR_SURF_DEPTH_MICRO_TILING) |
+				   PIPE_CONFIG(ADDR_SURF_P8_32x32_16x16) |
+				   TILE_SPLIT(split_equal_to_row_size));
+		modearray[8] = (ARRAY_MODE(ARRAY_LINEAR_ALIGNED) |
+				   PIPE_CONFIG(ADDR_SURF_P8_32x32_16x16));
+		modearray[9] = (ARRAY_MODE(ARRAY_1D_TILED_THIN1) |
+				   PIPE_CONFIG(ADDR_SURF_P8_32x32_16x16) |
+				   MICRO_TILE_MODE_NEW(ADDR_SURF_DISPLAY_MICRO_TILING));
+		modearray[10] = (ARRAY_MODE(ARRAY_2D_TILED_THIN1) |
+				    MICRO_TILE_MODE_NEW(ADDR_SURF_DISPLAY_MICRO_TILING) |
+				    PIPE_CONFIG(ADDR_SURF_P8_32x32_16x16) |
+				    SAMPLE_SPLIT(ADDR_SURF_SAMPLE_SPLIT_2));
+		modearray[11] = (ARRAY_MODE(ARRAY_PRT_TILED_THIN1) |
+				    MICRO_TILE_MODE_NEW(ADDR_SURF_DISPLAY_MICRO_TILING) |
+				    PIPE_CONFIG(ADDR_SURF_P8_32x32_8x16) |
+				    SAMPLE_SPLIT(ADDR_SURF_SAMPLE_SPLIT_2));
+		modearray[12] = (ARRAY_MODE(ARRAY_PRT_2D_TILED_THIN1) |
+				    MICRO_TILE_MODE_NEW(ADDR_SURF_DISPLAY_MICRO_TILING) |
+				    PIPE_CONFIG(ADDR_SURF_P8_32x32_16x16) |
+				    SAMPLE_SPLIT(ADDR_SURF_SAMPLE_SPLIT_2));
+		modearray[13] = (ARRAY_MODE(ARRAY_1D_TILED_THIN1) |
+				    PIPE_CONFIG(ADDR_SURF_P8_32x32_16x16) |
+				    MICRO_TILE_MODE_NEW(ADDR_SURF_THIN_MICRO_TILING));
+		modearray[14] = (ARRAY_MODE(ARRAY_2D_TILED_THIN1) |
+				    MICRO_TILE_MODE_NEW(ADDR_SURF_THIN_MICRO_TILING) |
+				    PIPE_CONFIG(ADDR_SURF_P8_32x32_16x16) |
+				    SAMPLE_SPLIT(ADDR_SURF_SAMPLE_SPLIT_2));
+		modearray[16] = (ARRAY_MODE(ARRAY_PRT_TILED_THIN1) |
+				    MICRO_TILE_MODE_NEW(ADDR_SURF_THIN_MICRO_TILING) |
+				    PIPE_CONFIG(ADDR_SURF_P8_32x32_8x16) |
+				    SAMPLE_SPLIT(ADDR_SURF_SAMPLE_SPLIT_2));
+		modearray[17] = (ARRAY_MODE(ARRAY_PRT_2D_TILED_THIN1) |
+				    MICRO_TILE_MODE_NEW(ADDR_SURF_THIN_MICRO_TILING) |
+				    PIPE_CONFIG(ADDR_SURF_P8_32x32_16x16) |
+				    SAMPLE_SPLIT(ADDR_SURF_SAMPLE_SPLIT_2));
+		modearray[27] = (ARRAY_MODE(ARRAY_1D_TILED_THIN1) |
+				    PIPE_CONFIG(ADDR_SURF_P8_32x32_16x16) |
+				    MICRO_TILE_MODE_NEW(ADDR_SURF_ROTATED_MICRO_TILING));
+		modearray[28] = (ARRAY_MODE(ARRAY_2D_TILED_THIN1) |
+				    MICRO_TILE_MODE_NEW(ADDR_SURF_ROTATED_MICRO_TILING) |
+				    PIPE_CONFIG(ADDR_SURF_P8_32x32_16x16) |
+				    SAMPLE_SPLIT(ADDR_SURF_SAMPLE_SPLIT_2));
+		modearray[29] = (ARRAY_MODE(ARRAY_PRT_TILED_THIN1) |
+				    MICRO_TILE_MODE_NEW(ADDR_SURF_ROTATED_MICRO_TILING) |
+				    PIPE_CONFIG(ADDR_SURF_P8_32x32_8x16) |
+				    SAMPLE_SPLIT(ADDR_SURF_SAMPLE_SPLIT_2));
+		modearray[30] = (ARRAY_MODE(ARRAY_PRT_2D_TILED_THIN1) |
+				    MICRO_TILE_MODE_NEW(ADDR_SURF_ROTATED_MICRO_TILING) |
+				    PIPE_CONFIG(ADDR_SURF_P8_32x32_16x16) |
+				    SAMPLE_SPLIT(ADDR_SURF_SAMPLE_SPLIT_2));
+
+		mod2array[0] = (BANK_WIDTH(ADDR_SURF_BANK_WIDTH_1) |
+					BANK_HEIGHT(ADDR_SURF_BANK_HEIGHT_4) |
+					MACRO_TILE_ASPECT(ADDR_SURF_MACRO_ASPECT_4) |
+					NUM_BANKS(ADDR_SURF_16_BANK));
+		mod2array[1] = (BANK_WIDTH(ADDR_SURF_BANK_WIDTH_1) |
+					BANK_HEIGHT(ADDR_SURF_BANK_HEIGHT_2) |
+					MACRO_TILE_ASPECT(ADDR_SURF_MACRO_ASPECT_2) |
+					NUM_BANKS(ADDR_SURF_16_BANK));
+		mod2array[2] = (BANK_WIDTH(ADDR_SURF_BANK_WIDTH_1) |
+					BANK_HEIGHT(ADDR_SURF_BANK_HEIGHT_1) |
+					MACRO_TILE_ASPECT(ADDR_SURF_MACRO_ASPECT_2) |
+					NUM_BANKS(ADDR_SURF_16_BANK));
+		mod2array[3] = (BANK_WIDTH(ADDR_SURF_BANK_WIDTH_1) |
+					BANK_HEIGHT(ADDR_SURF_BANK_HEIGHT_1) |
+					MACRO_TILE_ASPECT(ADDR_SURF_MACRO_ASPECT_2) |
+					NUM_BANKS(ADDR_SURF_16_BANK));
+		mod2array[4] = (BANK_WIDTH(ADDR_SURF_BANK_WIDTH_1) |
+					BANK_HEIGHT(ADDR_SURF_BANK_HEIGHT_1) |
+					MACRO_TILE_ASPECT(ADDR_SURF_MACRO_ASPECT_1) |
+					NUM_BANKS(ADDR_SURF_8_BANK));
+		mod2array[5] = (BANK_WIDTH(ADDR_SURF_BANK_WIDTH_1) |
+					BANK_HEIGHT(ADDR_SURF_BANK_HEIGHT_1) |
+					MACRO_TILE_ASPECT(ADDR_SURF_MACRO_ASPECT_1) |
+					NUM_BANKS(ADDR_SURF_4_BANK));
+		mod2array[6] = (BANK_WIDTH(ADDR_SURF_BANK_WIDTH_1) |
+					BANK_HEIGHT(ADDR_SURF_BANK_HEIGHT_1) |
+					MACRO_TILE_ASPECT(ADDR_SURF_MACRO_ASPECT_1) |
+					NUM_BANKS(ADDR_SURF_2_BANK));
+		mod2array[8] = (BANK_WIDTH(ADDR_SURF_BANK_WIDTH_1) |
+					BANK_HEIGHT(ADDR_SURF_BANK_HEIGHT_8) |
+					MACRO_TILE_ASPECT(ADDR_SURF_MACRO_ASPECT_4) |
+					NUM_BANKS(ADDR_SURF_16_BANK));
+		mod2array[9] = (BANK_WIDTH(ADDR_SURF_BANK_WIDTH_1) |
+					BANK_HEIGHT(ADDR_SURF_BANK_HEIGHT_4) |
+					MACRO_TILE_ASPECT(ADDR_SURF_MACRO_ASPECT_4) |
+					NUM_BANKS(ADDR_SURF_16_BANK));
+		mod2array[10] = (BANK_WIDTH(ADDR_SURF_BANK_WIDTH_1) |
+					BANK_HEIGHT(ADDR_SURF_BANK_HEIGHT_2) |
+					MACRO_TILE_ASPECT(ADDR_SURF_MACRO_ASPECT_2) |
+					NUM_BANKS(ADDR_SURF_16_BANK));
+		mod2array[11] = (BANK_WIDTH(ADDR_SURF_BANK_WIDTH_1) |
+					BANK_HEIGHT(ADDR_SURF_BANK_HEIGHT_1) |
+					MACRO_TILE_ASPECT(ADDR_SURF_MACRO_ASPECT_2) |
+					NUM_BANKS(ADDR_SURF_16_BANK));
+		mod2array[12] = (BANK_WIDTH(ADDR_SURF_BANK_WIDTH_1) |
+					BANK_HEIGHT(ADDR_SURF_BANK_HEIGHT_1) |
+					MACRO_TILE_ASPECT(ADDR_SURF_MACRO_ASPECT_1) |
+					NUM_BANKS(ADDR_SURF_8_BANK));
+		mod2array[13] = (BANK_WIDTH(ADDR_SURF_BANK_WIDTH_1) |
+					BANK_HEIGHT(ADDR_SURF_BANK_HEIGHT_1) |
+					MACRO_TILE_ASPECT(ADDR_SURF_MACRO_ASPECT_1) |
+					NUM_BANKS(ADDR_SURF_4_BANK));
+		mod2array[14] = (BANK_WIDTH(ADDR_SURF_BANK_WIDTH_1) |
+					BANK_HEIGHT(ADDR_SURF_BANK_HEIGHT_1) |
+					MACRO_TILE_ASPECT(ADDR_SURF_MACRO_ASPECT_1) |
+					NUM_BANKS(ADDR_SURF_2_BANK));
+
+		for (reg_offset = 0; reg_offset < num_tile_mode_states; reg_offset++)
+			WREG32(mmGB_TILE_MODE0 + reg_offset, modearray[reg_offset]);
+
+		for (reg_offset = 0; reg_offset < num_secondary_tile_mode_states; reg_offset++)
+			if (reg_offset != 7)
+				WREG32(mmGB_MACROTILE_MODE0 + reg_offset, mod2array[reg_offset]);
+		break;
+
 	default:
 		dev_warn(adev->dev,
 			 "Unknown chip type (%d) in function gfx_v8_0_tiling_mode_table_init() falling through to CHIP_CARRIZO\n",
@@ -4865,8 +5032,10 @@ static int gfx_v8_0_cp_test_all_rings(struct amdgpu_device *adev)
 	/* collect all the ring_tests here, gfx, kiq, compute */
 	ring = &adev->gfx.gfx_ring[0];
 	r = amdgpu_ring_test_helper(ring);
-	if (r)
+	if (r) {
+		DRM_INFO("amdgpu: amdgpu_ring_test_helper");
 		return r;
+	}
 
 	ring = &adev->gfx.kiq[0].ring;
 	r = amdgpu_ring_test_helper(ring);
@@ -4888,22 +5057,27 @@ static int gfx_v8_0_cp_resume(struct amdgpu_device *adev)
 	if (!(adev->flags & AMD_IS_APU))
 		gfx_v8_0_enable_gui_idle_interrupt(adev, false);
 
+	DRM_INFO("amdgpu: gfx_v8_0_kiq_resume");
 	r = gfx_v8_0_kiq_resume(adev);
 	if (r)
 		return r;
 
+	DRM_INFO("amdgpu: gfx_v8_0_cp_gfx_resume");
 	r = gfx_v8_0_cp_gfx_resume(adev);
 	if (r)
 		return r;
 
+	DRM_INFO("amdgpu: gfx_v8_0_kcq_resume");
 	r = gfx_v8_0_kcq_resume(adev);
 	if (r)
 		return r;
 
+	DRM_INFO("amdgpu: gfx_v8_0_cp_test_all_rings");
 	r = gfx_v8_0_cp_test_all_rings(adev);
 	if (r)
 		return r;
 
+	DRM_INFO("amdgpu: gfx_v8_0_enable_gui_idle_interrupt");
 	gfx_v8_0_enable_gui_idle_interrupt(adev, true);
 
 	return 0;
