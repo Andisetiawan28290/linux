@@ -408,19 +408,6 @@ static const u32 gladius_golden_common_all[] =
 	mmVM_CONTEXTS_DISABLE, 0xffffffff, 0x00000000,		//not present on polaris10
 };
 
-//is this needed? none of the newer cards use mgcg_cgcg_init
-static const u32 gladius_mgcg_cgcg_init[] =
-{
-	0x0000313a, 0xffffffff, 0x00000003, /* mmRLC_SAFE_MODE */
-	0x00003079, 0xffffffff, 0x00020201,	/* mmCP_MEM_SLP_CNTL */
-	0x00003108, 0xffffffff, 0xfffffffd,	/* mmRLC_CGTT_MGCG_OVERRIDE */
-	0x0000c200, 0xffffffff, 0xe0000000,	/* mmGRBM_GFX_INDEX */
-	0x0000311d, 0xffffffff, 0xffffffff,	/* mmRLC_SERDES_WR_CU_MASTER_MASK */
-	0x0000311e, 0xffffffff, 0xffffffff,	/* mmRLC_SERDES_WR_NONCU_MASTER_MASK */
-	0x0000311f, 0xffffffff, 0x004000ff,	/* mmRLC_SERDES_WR_CTRL */
-	0x0000313a, 0xffffffff, 0x00000001,	/* mmRLC_GPR_REG2 */
-};
-
 static const u32 golden_settings_polaris10_a11[] =
 {
 	mmATC_MISC_CG, 0x000c0fc0, 0x000c0200,
@@ -865,9 +852,6 @@ static void gfx_v8_0_init_golden_registers(struct amdgpu_device *adev)
 		}
 		break;
 	case CHIP_GLADIUS:
-		amdgpu_device_program_register_sequence(adev,
-							gladius_mgcg_cgcg_init,
-							ARRAY_SIZE(gladius_mgcg_cgcg_init));
 		amdgpu_device_program_register_sequence(adev,
 							golden_settings_gladius_a11,
 							ARRAY_SIZE(golden_settings_gladius_a11));

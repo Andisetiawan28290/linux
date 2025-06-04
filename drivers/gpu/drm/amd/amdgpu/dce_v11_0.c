@@ -182,7 +182,6 @@ static void dce_v11_0_init_golden_registers(struct amdgpu_device *adev)
 							polaris11_golden_settings_a11,
 							ARRAY_SIZE(polaris11_golden_settings_a11));
 		break;
-	//same as polaris10 and vegam. not sure if mgcg_cgcg_init is needed
 	case CHIP_GLADIUS:
 	case CHIP_POLARIS10:
 	case CHIP_VEGAM:

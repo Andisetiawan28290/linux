@@ -521,11 +521,6 @@ static void vi_init_golden_registers(struct amdgpu_device *adev)
 							ARRAY_SIZE(stoney_mgcg_cgcg_init));
 		break;
 	case CHIP_GLADIUS:
-		//unsure
-		// amdgpu_device_program_register_sequence(adev,
-		// 					gladius_mgcg_cgcg_init,
-		// 					ARRAY_SIZE(gladius_mgcg_cgcg_init));
-		break;
 	case CHIP_POLARIS10:
 	case CHIP_POLARIS11:
 	case CHIP_POLARIS12:
