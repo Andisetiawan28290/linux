@@ -585,6 +585,9 @@ static int gmc_v8_0_mc_init(struct amdgpu_device *adev)
 		default:
 			adev->gmc.gart_size = 256ULL << 20;
 			break;
+		case CHIP_GLADIUS:
+			adev->gmc.gart_size = 512ULL << 20;
+			break;
 		case CHIP_TONGA:   /* UVD, VCE do not support GPUVM */
 		case CHIP_FIJI:    /* UVD, VCE do not support GPUVM */
 		case CHIP_CARRIZO: /* UVD, VCE do not support GPUVM, DCE SG support */
