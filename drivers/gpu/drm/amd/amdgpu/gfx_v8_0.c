@@ -376,20 +376,18 @@ static const u32 polaris11_golden_common_all[] =
 
 static const u32 golden_settings_gladius_a11[] =
 {
-	mmATC_MISC_CG, 0x000c0fc0, 0x000c0200,
 	mmCB_HW_CONTROL, 0x0001f3cf, 0x00007208,
 	mmCB_HW_CONTROL_2, 0x0f000000, 0x0f000000,
 	mmCB_HW_CONTROL_3, 0x000001ff, 0x00000040,
 	mmDB_DEBUG2, 0xf00fffff, 0x00000400,
 	mmPA_SC_ENHANCE, 0xffffffff, 0x20000001,
+	mmPA_SC_FIFO_DEPTH_CNTL, 0x000003ff, 0x000000fc,
 	mmPA_SC_LINE_STIPPLE_STATE, 0x0000ff0f, 0x00000000,
-	mmPA_SC_RASTER_CONFIG, 0x3f3fffff, 0x2a00161a,		//different from polaris10. closest is fiji with 0x3a00161a
-	mmPA_SC_RASTER_CONFIG_1, 0x0000003f, 0x0000002e,	//Same as vegam
-	mmRLC_CGCG_CGLS_CTRL, 0x00000003, 0x0001003c,
-	mmRLC_CGCG_CGLS_CTRL_3D, 0xffffffff, 0x0001003c,
-	mmSQ_CONFIG, 0x07f80000, 0x07180000,
-	mmTA_CNTL_AUX, 0x000f000f, 0x000b0000,
+	mmRLC_CGCG_CGLS_CTRL, 0x00000003, 0x0000003c,
+	mmSQ_RANDOM_WAVE_PRI, 0x001fffff, 0x000006fd,
+	mmTA_CNTL_AUX, 0x000f000f, 0x00010000,
 	mmTCC_CTRL, 0x00100000, 0xf31fff7f,
+	mmTCC_EXE_DISABLE, 0x00000002, 0x00000002,
 	mmTCP_ADDR_CONFIG, 0x000003ff, 0x000000f7,
 	mmTCP_CHAN_STEER_HI, 0xffffffff, 0x00000000,
 	mmVGT_RESET_DEBUG, 0x00000004, 0x00000004,
@@ -398,14 +396,103 @@ static const u32 golden_settings_gladius_a11[] =
 static const u32 gladius_golden_common_all[] =
 {
 	mmGRBM_GFX_INDEX, 0xffffffff, 0xe0000000,
-	mmPA_SC_RASTER_CONFIG, 0xffffffff, 0x2a00161a,		//different from polaris10
-	mmPA_SC_RASTER_CONFIG_1, 0xffffffff, 0x0000002e,	//same as vegam
-	mmGB_ADDR_CONFIG, 0xffffffff, 0x22011003,			//same as vegam
+	mmPA_SC_RASTER_CONFIG, 0xffffffff, 0x2a00161a,
+	mmPA_SC_RASTER_CONFIG_1, 0xffffffff, 0x0000002e,
+	mmGB_ADDR_CONFIG, 0xffffffff, 0x22011003,
 	mmSPI_RESOURCE_RESERVE_CU_0, 0xffffffff, 0x00000800,
 	mmSPI_RESOURCE_RESERVE_CU_1, 0xffffffff, 0x00000800,
 	mmSPI_RESOURCE_RESERVE_EN_CU_0, 0xffffffff, 0x00FF7FBF,
 	mmSPI_RESOURCE_RESERVE_EN_CU_1, 0xffffffff, 0x00FF7FAF,
-	mmVM_CONTEXTS_DISABLE, 0xffffffff, 0x00000000,		//not present on polaris10
+	mmVM_CONTEXTS_DISABLE, 0xffffffff, 0x00000000,
+};
+
+static const u32 gladius_mgcg_cgcg_init[] =
+{
+	mmRLC_CGTT_MGCG_OVERRIDE, 0xffffffff, 0xffffffff,
+	mmGRBM_GFX_INDEX, 0xffffffff, 0xe0000000,
+	mmCB_CGTT_SCLK_CTRL, 0xffffffff, 0x00000100,
+	mmCGTT_BCI_CLK_CTRL, 0xffffffff, 0x00000100,
+	mmCGTT_CP_CLK_CTRL, 0xffffffff, 0x00000100,
+	mmCGTT_CPC_CLK_CTRL, 0xffffffff, 0x00000100,
+	mmCGTT_CPF_CLK_CTRL, 0xffffffff, 0x00000100,
+	mmCGTT_GDS_CLK_CTRL, 0xffffffff, 0x00000100,
+	mmCGTT_IA_CLK_CTRL, 0xffffffff, 0x06000100,
+	mmCGTT_PA_CLK_CTRL, 0xffffffff, 0x00000100,
+	mmCGTT_WD_CLK_CTRL, 0xffffffff, 0x06000100,
+	mmCGTT_PC_CLK_CTRL, 0xffffffff, 0x00000100,
+	mmCGTT_RLC_CLK_CTRL, 0xffffffff, 0x00000100,
+	mmCGTT_SC_CLK_CTRL, 0xffffffff, 0x00000100,
+	mmCGTT_SPI_CLK_CTRL, 0xffffffff, 0x00000100,
+	mmCGTT_SQ_CLK_CTRL, 0xffffffff, 0x00000100,
+	mmCGTT_SQG_CLK_CTRL, 0xffffffff, 0x00000100,
+	mmCGTT_SX_CLK_CTRL0, 0xffffffff, 0x00000100,
+	mmCGTT_SX_CLK_CTRL1, 0xffffffff, 0x00000100,
+	mmCGTT_SX_CLK_CTRL2, 0xffffffff, 0x00000100,
+	mmCGTT_SX_CLK_CTRL3, 0xffffffff, 0x00000100,
+	mmCGTT_SX_CLK_CTRL4, 0xffffffff, 0x00000100,
+	mmCGTT_TCI_CLK_CTRL, 0xffffffff, 0x00000100,
+	mmCGTT_TCP_CLK_CTRL, 0xffffffff, 0x00000100,
+	mmCGTT_VGT_CLK_CTRL, 0xffffffff, 0x06000100,
+	mmDB_CGTT_CLK_CTRL_0, 0xffffffff, 0x00000100,
+	mmTA_CGTT_CTRL, 0xffffffff, 0x00000100,
+	mmTCA_CGTT_SCLK_CTRL, 0xffffffff, 0x00000100,
+	mmTCC_CGTT_SCLK_CTRL, 0xffffffff, 0x00000100,
+	mmTD_CGTT_CTRL, 0xffffffff, 0x00000100,
+	mmGRBM_GFX_INDEX, 0xffffffff, 0xe0000000,
+	mmCGTS_CU0_SP0_CTRL_REG, 0xffffffff, 0x00010000,
+	mmCGTS_CU0_LDS_SQ_CTRL_REG, 0xffffffff, 0x00030002,
+	mmCGTS_CU0_TA_SQC_CTRL_REG, 0xffffffff, 0x00040007,
+	mmCGTS_CU0_SP1_CTRL_REG, 0xffffffff, 0x00060005,
+	mmCGTS_CU0_TD_TCP_CTRL_REG, 0xffffffff, 0x00090008,
+	mmCGTS_CU1_SP0_CTRL_REG, 0xffffffff, 0x00010000,
+	mmCGTS_CU1_LDS_SQ_CTRL_REG, 0xffffffff, 0x00030002,
+	mmCGTS_CU1_TA_CTRL_REG, 0xffffffff, 0x00040007,
+	mmCGTS_CU1_SP1_CTRL_REG, 0xffffffff, 0x00060005,
+	mmCGTS_CU1_TD_TCP_CTRL_REG, 0xffffffff, 0x00090008,
+	mmCGTS_CU2_SP0_CTRL_REG, 0xffffffff, 0x00010000,
+	mmCGTS_CU2_LDS_SQ_CTRL_REG, 0xffffffff, 0x00030002,
+	mmCGTS_CU2_TA_CTRL_REG, 0xffffffff, 0x00040007,
+	mmCGTS_CU2_SP1_CTRL_REG, 0xffffffff, 0x00060005,
+	mmCGTS_CU2_TD_TCP_CTRL_REG, 0xffffffff, 0x00090008,
+	mmCGTS_CU3_SP0_CTRL_REG, 0xffffffff, 0x00010000,
+	mmCGTS_CU3_LDS_SQ_CTRL_REG, 0xffffffff, 0x00030002,
+	mmCGTS_CU3_TA_CTRL_REG, 0xffffffff, 0x00040007,
+	mmCGTS_CU3_SP1_CTRL_REG, 0xffffffff, 0x00060005,
+	mmCGTS_CU3_TD_TCP_CTRL_REG, 0xffffffff, 0x00090008,
+	mmCGTS_CU4_SP0_CTRL_REG, 0xffffffff, 0x00010000,
+	mmCGTS_CU4_LDS_SQ_CTRL_REG, 0xffffffff, 0x00030002,
+	mmCGTS_CU4_TA_SQC_CTRL_REG, 0xffffffff, 0x00040007,
+	mmCGTS_CU4_SP1_CTRL_REG, 0xffffffff, 0x00060005,
+	mmCGTS_CU4_TD_TCP_CTRL_REG, 0xffffffff, 0x00090008,
+	mmCGTS_CU5_SP0_CTRL_REG, 0xffffffff, 0x00010000,
+	mmCGTS_CU5_LDS_SQ_CTRL_REG, 0xffffffff, 0x00030002,
+	mmCGTS_CU5_TA_CTRL_REG, 0xffffffff, 0x00040007,
+	mmCGTS_CU5_SP1_CTRL_REG, 0xffffffff, 0x00060005,
+	mmCGTS_CU5_TD_TCP_CTRL_REG, 0xffffffff, 0x00090008,
+	mmCGTS_CU6_SP0_CTRL_REG, 0xffffffff, 0x00010000,
+	mmCGTS_CU6_LDS_SQ_CTRL_REG, 0xffffffff, 0x00030002,
+	mmCGTS_CU6_TA_CTRL_REG, 0xffffffff, 0x00040007,
+	mmCGTS_CU6_SP1_CTRL_REG, 0xffffffff, 0x00060005,
+	mmCGTS_CU6_TD_TCP_CTRL_REG, 0xffffffff, 0x00090008,
+	mmCGTS_CU7_SP0_CTRL_REG, 0xffffffff, 0x00010000,
+	mmCGTS_CU7_LDS_SQ_CTRL_REG, 0xffffffff, 0x00030002,
+	mmCGTS_CU7_TA_CTRL_REG, 0xffffffff, 0x00040007,
+	mmCGTS_CU7_SP1_CTRL_REG, 0xffffffff, 0x00060005,
+	mmCGTS_CU7_TD_TCP_CTRL_REG, 0xffffffff, 0x00090008,
+	mmCGTS_CU8_SP0_CTRL_REG, 0xffffffff, 0x00010000,
+	mmCGTS_CU8_LDS_SQ_CTRL_REG, 0xffffffff, 0x00030002,
+	mmCGTS_CU8_TA_SQC_CTRL_REG, 0xffffffff, 0x00040007,
+	mmCGTS_CU8_SP1_CTRL_REG, 0xffffffff, 0x00060005,
+	mmCGTS_CU8_TD_TCP_CTRL_REG, 0xffffffff, 0x00090008,
+	mmCGTS_CU9_SP0_CTRL_REG, 0xffffffff, 0x00010000,
+	mmCGTS_CU9_LDS_SQ_CTRL_REG, 0xffffffff, 0x00030002,
+	mmCGTS_CU9_TA_CTRL_REG, 0xffffffff, 0x00040007,
+	mmCGTS_CU9_SP1_CTRL_REG, 0xffffffff, 0x00060005,
+	mmCGTS_CU9_TD_TCP_CTRL_REG, 0xffffffff, 0x00090008,
+	mmCGTS_SM_CTRL_REG, 0xffffffff, 0x96e00200,
+	mmCP_RB_WPTR_POLL_CNTL, 0xffffffff, 0x00900100,
+	mmRLC_CGCG_CGLS_CTRL, 0xffffffff, 0x0020003c,
+	mmCP_MEM_SLP_CNTL, 0x00000001, 0x00000001,
 };
 
 static const u32 golden_settings_polaris10_a11[] =
@@ -710,7 +797,7 @@ static const u32 cz_mgcg_cgcg_init[] =
 	mmCGTS_CU7_TA_CTRL_REG, 0xffffffff, 0x00040007,
 	mmCGTS_CU7_SP1_CTRL_REG, 0xffffffff, 0x00060005,
 	mmCGTS_CU7_TD_TCP_CTRL_REG, 0xffffffff, 0x00090008,
-	mmCGTS_SM_CTRL_REG, 0xffffffff, 0x96e00200,
+	mmCGTS_SM_CTRL_REG, 0xffffffff, 0x96940200,
 	mmCP_RB_WPTR_POLL_CNTL, 0xffffffff, 0x00900100,
 	mmRLC_CGCG_CGLS_CTRL, 0xffffffff, 0x0020003f,
 	mmCP_MEM_SLP_CNTL, 0x00000001, 0x00000001,
@@ -852,6 +939,9 @@ static void gfx_v8_0_init_golden_registers(struct amdgpu_device *adev)
 		}
 		break;
 	case CHIP_GLADIUS:
+		amdgpu_device_program_register_sequence(adev,
+							gladius_mgcg_cgcg_init,
+							ARRAY_SIZE(gladius_mgcg_cgcg_init));
 		amdgpu_device_program_register_sequence(adev,
 							golden_settings_gladius_a11,
 							ARRAY_SIZE(golden_settings_gladius_a11));
@@ -1766,37 +1856,11 @@ static int gfx_v8_0_gpu_early_init(struct amdgpu_device *adev)
 		adev->gfx.config.sc_earlyz_tile_fifo_size = 0x130;
 		gb_addr_config = POLARIS11_GB_ADDR_CONFIG_GOLDEN;
 		break;
-	case CHIP_GLADIUS:
-		adev->gfx.config.max_shader_engines = 4;
-		adev->gfx.config.max_tile_pipes = 8;
-		adev->gfx.config.max_cu_per_sh = 8;
-		adev->gfx.config.max_sh_per_se = 1;
-		adev->gfx.config.max_backends_per_se = 2;
-		adev->gfx.config.max_texture_channel_caches = 8;
-		adev->gfx.config.max_gprs = 256;
-		adev->gfx.config.max_gs_threads = 32;
-		adev->gfx.config.max_hw_contexts = 8;
-
-		adev->gfx.config.sc_prim_fifo_size_frontend = 0x20;
-		adev->gfx.config.sc_prim_fifo_size_backend = 0x100;
-		adev->gfx.config.sc_hiz_tile_fifo_size = 0x30;
-		adev->gfx.config.sc_earlyz_tile_fifo_size = 0x130;
-		gb_addr_config = TONGA_GB_ADDR_CONFIG_GOLDEN;
-		break;
 	case CHIP_POLARIS10:
 	case CHIP_VEGAM:
-	#ifdef CONFIG_X86_PS4
-		adev->gfx.config.max_shader_engines = 4;
-		adev->gfx.config.max_tile_pipes = 8;
-		adev->gfx.config.max_cu_per_sh = 8;
-		adev->gfx.config.max_sh_per_se = 1;
-		adev->gfx.config.max_backends_per_se = 2;
-		adev->gfx.config.max_texture_channel_caches = 8;
-	#else
 		ret = amdgpu_atombios_get_gfx_info(adev);
 		if (ret)
 			return ret;
-	#endif
 		adev->gfx.config.max_gprs = 256;
 		adev->gfx.config.max_gs_threads = 32;
 		adev->gfx.config.max_hw_contexts = 8;
@@ -1808,6 +1872,7 @@ static int gfx_v8_0_gpu_early_init(struct amdgpu_device *adev)
 		gb_addr_config = TONGA_GB_ADDR_CONFIG_GOLDEN;
 		break;
 	case CHIP_TONGA:
+	case CHIP_GLADIUS:
 		adev->gfx.config.max_shader_engines = 4;
 		adev->gfx.config.max_tile_pipes = 8;
 		adev->gfx.config.max_cu_per_sh = 8;
@@ -2568,6 +2633,7 @@ static void gfx_v8_0_tiling_mode_table_init(struct amdgpu_device *adev)
 
 		break;
 	case CHIP_TONGA:
+	case CHIP_GLADIUS:
 		modearray[0] = (ARRAY_MODE(ARRAY_2D_TILED_THIN1) |
 				PIPE_CONFIG(ADDR_SURF_P8_32x32_16x16) |
 				TILE_SPLIT(ADDR_SURF_TILE_SPLIT_64B) |
@@ -3331,151 +3397,6 @@ static void gfx_v8_0_tiling_mode_table_init(struct amdgpu_device *adev)
 			if (reg_offset != 7)
 				WREG32(mmGB_MACROTILE_MODE0 + reg_offset, mod2array[reg_offset]);
 
-		break;
-
-	case CHIP_GLADIUS:
-		modearray[0] = (ARRAY_MODE(ARRAY_2D_TILED_THIN1) |
-				   MICRO_TILE_MODE_NEW(ADDR_SURF_DEPTH_MICRO_TILING) |
-				   PIPE_CONFIG(ADDR_SURF_P8_32x32_16x16) |
-				   TILE_SPLIT(ADDR_SURF_TILE_SPLIT_64B));
-		modearray[1] = (ARRAY_MODE(ARRAY_2D_TILED_THIN1) |
-				   MICRO_TILE_MODE_NEW(ADDR_SURF_DEPTH_MICRO_TILING) |
-				   PIPE_CONFIG(ADDR_SURF_P8_32x32_16x16) |
-				   TILE_SPLIT(ADDR_SURF_TILE_SPLIT_128B));
-		modearray[2] = (ARRAY_MODE(ARRAY_2D_TILED_THIN1) |
-				   MICRO_TILE_MODE_NEW(ADDR_SURF_DEPTH_MICRO_TILING) |
-				   PIPE_CONFIG(ADDR_SURF_P8_32x32_16x16) |
-				   TILE_SPLIT(ADDR_SURF_TILE_SPLIT_256B));
-		modearray[3] = (ARRAY_MODE(ARRAY_2D_TILED_THIN1) |
-				   MICRO_TILE_MODE_NEW(ADDR_SURF_DEPTH_MICRO_TILING) |
-				   PIPE_CONFIG(ADDR_SURF_P8_32x32_16x16) |
-				   TILE_SPLIT(ADDR_SURF_TILE_SPLIT_512B));
-		modearray[4] = (ARRAY_MODE(ARRAY_2D_TILED_THIN1) |
-				   MICRO_TILE_MODE_NEW(ADDR_SURF_DEPTH_MICRO_TILING) |
-				   PIPE_CONFIG(ADDR_SURF_P8_32x32_16x16) |
-				   TILE_SPLIT(split_equal_to_row_size));
-		modearray[5] = (ARRAY_MODE(ARRAY_1D_TILED_THIN1) |
-				   PIPE_CONFIG(ADDR_SURF_P8_32x32_16x16) |
-				   MICRO_TILE_MODE_NEW(ADDR_SURF_DEPTH_MICRO_TILING));
-		modearray[6] = (ARRAY_MODE(ARRAY_PRT_2D_TILED_THIN1) |
-				   MICRO_TILE_MODE_NEW(ADDR_SURF_DEPTH_MICRO_TILING) |
-				   PIPE_CONFIG(ADDR_SURF_P8_32x32_16x16) |
-				   TILE_SPLIT(ADDR_SURF_TILE_SPLIT_256B));
-		modearray[7] = (ARRAY_MODE(ARRAY_PRT_2D_TILED_THIN1) |
-				   MICRO_TILE_MODE_NEW(ADDR_SURF_DEPTH_MICRO_TILING) |
-				   PIPE_CONFIG(ADDR_SURF_P8_32x32_16x16) |
-				   TILE_SPLIT(split_equal_to_row_size));
-		modearray[8] = (ARRAY_MODE(ARRAY_LINEAR_ALIGNED) |
-				   PIPE_CONFIG(ADDR_SURF_P8_32x32_16x16));
-		modearray[9] = (ARRAY_MODE(ARRAY_1D_TILED_THIN1) |
-				   PIPE_CONFIG(ADDR_SURF_P8_32x32_16x16) |
-				   MICRO_TILE_MODE_NEW(ADDR_SURF_DISPLAY_MICRO_TILING));
-		modearray[10] = (ARRAY_MODE(ARRAY_2D_TILED_THIN1) |
-				    MICRO_TILE_MODE_NEW(ADDR_SURF_DISPLAY_MICRO_TILING) |
-				    PIPE_CONFIG(ADDR_SURF_P8_32x32_16x16) |
-				    SAMPLE_SPLIT(ADDR_SURF_SAMPLE_SPLIT_2));
-		modearray[11] = (ARRAY_MODE(ARRAY_PRT_TILED_THIN1) |
-				    MICRO_TILE_MODE_NEW(ADDR_SURF_DISPLAY_MICRO_TILING) |
-				    PIPE_CONFIG(ADDR_SURF_P8_32x32_8x16) |
-				    SAMPLE_SPLIT(ADDR_SURF_SAMPLE_SPLIT_2));
-		modearray[12] = (ARRAY_MODE(ARRAY_PRT_2D_TILED_THIN1) |
-				    MICRO_TILE_MODE_NEW(ADDR_SURF_DISPLAY_MICRO_TILING) |
-				    PIPE_CONFIG(ADDR_SURF_P8_32x32_16x16) |
-				    SAMPLE_SPLIT(ADDR_SURF_SAMPLE_SPLIT_2));
-		modearray[13] = (ARRAY_MODE(ARRAY_1D_TILED_THIN1) |
-				    PIPE_CONFIG(ADDR_SURF_P8_32x32_16x16) |
-				    MICRO_TILE_MODE_NEW(ADDR_SURF_THIN_MICRO_TILING));
-		modearray[14] = (ARRAY_MODE(ARRAY_2D_TILED_THIN1) |
-				    MICRO_TILE_MODE_NEW(ADDR_SURF_THIN_MICRO_TILING) |
-				    PIPE_CONFIG(ADDR_SURF_P8_32x32_16x16) |
-				    SAMPLE_SPLIT(ADDR_SURF_SAMPLE_SPLIT_2));
-		modearray[16] = (ARRAY_MODE(ARRAY_PRT_TILED_THIN1) |
-				    MICRO_TILE_MODE_NEW(ADDR_SURF_THIN_MICRO_TILING) |
-				    PIPE_CONFIG(ADDR_SURF_P8_32x32_8x16) |
-				    SAMPLE_SPLIT(ADDR_SURF_SAMPLE_SPLIT_2));
-		modearray[17] = (ARRAY_MODE(ARRAY_PRT_2D_TILED_THIN1) |
-				    MICRO_TILE_MODE_NEW(ADDR_SURF_THIN_MICRO_TILING) |
-				    PIPE_CONFIG(ADDR_SURF_P8_32x32_16x16) |
-				    SAMPLE_SPLIT(ADDR_SURF_SAMPLE_SPLIT_2));
-		modearray[27] = (ARRAY_MODE(ARRAY_1D_TILED_THIN1) |
-				    PIPE_CONFIG(ADDR_SURF_P8_32x32_16x16) |
-				    MICRO_TILE_MODE_NEW(ADDR_SURF_ROTATED_MICRO_TILING));
-		modearray[28] = (ARRAY_MODE(ARRAY_2D_TILED_THIN1) |
-				    MICRO_TILE_MODE_NEW(ADDR_SURF_ROTATED_MICRO_TILING) |
-				    PIPE_CONFIG(ADDR_SURF_P8_32x32_16x16) |
-				    SAMPLE_SPLIT(ADDR_SURF_SAMPLE_SPLIT_2));
-		modearray[29] = (ARRAY_MODE(ARRAY_PRT_TILED_THIN1) |
-				    MICRO_TILE_MODE_NEW(ADDR_SURF_ROTATED_MICRO_TILING) |
-				    PIPE_CONFIG(ADDR_SURF_P8_32x32_8x16) |
-				    SAMPLE_SPLIT(ADDR_SURF_SAMPLE_SPLIT_2));
-		modearray[30] = (ARRAY_MODE(ARRAY_PRT_2D_TILED_THIN1) |
-				    MICRO_TILE_MODE_NEW(ADDR_SURF_ROTATED_MICRO_TILING) |
-				    PIPE_CONFIG(ADDR_SURF_P8_32x32_16x16) |
-				    SAMPLE_SPLIT(ADDR_SURF_SAMPLE_SPLIT_2));
-
-		mod2array[0] = (BANK_WIDTH(ADDR_SURF_BANK_WIDTH_1) |
-					BANK_HEIGHT(ADDR_SURF_BANK_HEIGHT_4) |
-					MACRO_TILE_ASPECT(ADDR_SURF_MACRO_ASPECT_4) |
-					NUM_BANKS(ADDR_SURF_16_BANK));
-		mod2array[1] = (BANK_WIDTH(ADDR_SURF_BANK_WIDTH_1) |
-					BANK_HEIGHT(ADDR_SURF_BANK_HEIGHT_2) |
-					MACRO_TILE_ASPECT(ADDR_SURF_MACRO_ASPECT_2) |
-					NUM_BANKS(ADDR_SURF_16_BANK));
-		mod2array[2] = (BANK_WIDTH(ADDR_SURF_BANK_WIDTH_1) |
-					BANK_HEIGHT(ADDR_SURF_BANK_HEIGHT_1) |
-					MACRO_TILE_ASPECT(ADDR_SURF_MACRO_ASPECT_2) |
-					NUM_BANKS(ADDR_SURF_16_BANK));
-		mod2array[3] = (BANK_WIDTH(ADDR_SURF_BANK_WIDTH_1) |
-					BANK_HEIGHT(ADDR_SURF_BANK_HEIGHT_1) |
-					MACRO_TILE_ASPECT(ADDR_SURF_MACRO_ASPECT_2) |
-					NUM_BANKS(ADDR_SURF_16_BANK));
-		mod2array[4] = (BANK_WIDTH(ADDR_SURF_BANK_WIDTH_1) |
-					BANK_HEIGHT(ADDR_SURF_BANK_HEIGHT_1) |
-					MACRO_TILE_ASPECT(ADDR_SURF_MACRO_ASPECT_1) |
-					NUM_BANKS(ADDR_SURF_8_BANK));
-		mod2array[5] = (BANK_WIDTH(ADDR_SURF_BANK_WIDTH_1) |
-					BANK_HEIGHT(ADDR_SURF_BANK_HEIGHT_1) |
-					MACRO_TILE_ASPECT(ADDR_SURF_MACRO_ASPECT_1) |
-					NUM_BANKS(ADDR_SURF_4_BANK));
-		mod2array[6] = (BANK_WIDTH(ADDR_SURF_BANK_WIDTH_1) |
-					BANK_HEIGHT(ADDR_SURF_BANK_HEIGHT_1) |
-					MACRO_TILE_ASPECT(ADDR_SURF_MACRO_ASPECT_1) |
-					NUM_BANKS(ADDR_SURF_2_BANK));
-		mod2array[8] = (BANK_WIDTH(ADDR_SURF_BANK_WIDTH_1) |
-					BANK_HEIGHT(ADDR_SURF_BANK_HEIGHT_8) |
-					MACRO_TILE_ASPECT(ADDR_SURF_MACRO_ASPECT_4) |
-					NUM_BANKS(ADDR_SURF_16_BANK));
-		mod2array[9] = (BANK_WIDTH(ADDR_SURF_BANK_WIDTH_1) |
-					BANK_HEIGHT(ADDR_SURF_BANK_HEIGHT_4) |
-					MACRO_TILE_ASPECT(ADDR_SURF_MACRO_ASPECT_4) |
-					NUM_BANKS(ADDR_SURF_16_BANK));
-		mod2array[10] = (BANK_WIDTH(ADDR_SURF_BANK_WIDTH_1) |
-					BANK_HEIGHT(ADDR_SURF_BANK_HEIGHT_2) |
-					MACRO_TILE_ASPECT(ADDR_SURF_MACRO_ASPECT_2) |
-					NUM_BANKS(ADDR_SURF_16_BANK));
-		mod2array[11] = (BANK_WIDTH(ADDR_SURF_BANK_WIDTH_1) |
-					BANK_HEIGHT(ADDR_SURF_BANK_HEIGHT_1) |
-					MACRO_TILE_ASPECT(ADDR_SURF_MACRO_ASPECT_2) |
-					NUM_BANKS(ADDR_SURF_16_BANK));
-		mod2array[12] = (BANK_WIDTH(ADDR_SURF_BANK_WIDTH_1) |
-					BANK_HEIGHT(ADDR_SURF_BANK_HEIGHT_1) |
-					MACRO_TILE_ASPECT(ADDR_SURF_MACRO_ASPECT_1) |
-					NUM_BANKS(ADDR_SURF_8_BANK));
-		mod2array[13] = (BANK_WIDTH(ADDR_SURF_BANK_WIDTH_1) |
-					BANK_HEIGHT(ADDR_SURF_BANK_HEIGHT_1) |
-					MACRO_TILE_ASPECT(ADDR_SURF_MACRO_ASPECT_1) |
-					NUM_BANKS(ADDR_SURF_4_BANK));
-		mod2array[14] = (BANK_WIDTH(ADDR_SURF_BANK_WIDTH_1) |
-					BANK_HEIGHT(ADDR_SURF_BANK_HEIGHT_1) |
-					MACRO_TILE_ASPECT(ADDR_SURF_MACRO_ASPECT_1) |
-					NUM_BANKS(ADDR_SURF_2_BANK));
-
-		for (reg_offset = 0; reg_offset < num_tile_mode_states; reg_offset++)
-			WREG32(mmGB_TILE_MODE0 + reg_offset, modearray[reg_offset]);
-
-		for (reg_offset = 0; reg_offset < num_secondary_tile_mode_states; reg_offset++)
-			if (reg_offset != 7)
-				WREG32(mmGB_MACROTILE_MODE0 + reg_offset, mod2array[reg_offset]);
 		break;
 
 	default:
