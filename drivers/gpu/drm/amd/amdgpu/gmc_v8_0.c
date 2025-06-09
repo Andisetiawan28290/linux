@@ -906,6 +906,19 @@ static int gmc_v8_0_gart_enable(struct amdgpu_device *adev)
 			       table_addr >> 12);
 	}
 
+	if (adev->asic_type == CHIP_GLADIUS) {
+		for (i = 2; i < 8; i++) {
+			WREG32(mmVM_CONTEXT0_PAGE_TABLE_START_ADDR + i, 0);
+			WREG32(mmVM_CONTEXT0_PAGE_TABLE_END_ADDR + i,
+			       adev->vm_manager.max_pfn - 1);
+		}
+		for (i = 0; i < 8; i++) {
+			WREG32(mmVM_CONTEXT8_PAGE_TABLE_START_ADDR + i, 0);
+			WREG32(mmVM_CONTEXT8_PAGE_TABLE_END_ADDR + i,
+			       adev->vm_manager.max_pfn - 1);
+		}
+	}
+
 	/* enable context1-15 */
 	WREG32(mmVM_CONTEXT1_PROTECTION_FAULT_DEFAULT_ADDR,
 	       (u32)(adev->dummy_page_addr >> 12));
