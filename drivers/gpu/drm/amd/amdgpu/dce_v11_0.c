@@ -2876,6 +2876,7 @@ static int dce_v11_0_early_init(void *handle)
 		break;
 	case CHIP_POLARIS10:
 	case CHIP_VEGAM:
+	case CHIP_GLADIUS:
 		adev->mode_info.num_hpd = 6;
 		adev->mode_info.num_dig = 6;
 		break;
