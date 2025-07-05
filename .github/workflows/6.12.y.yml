@@ -11,7 +11,7 @@ jobs:
       - name: Checkout the repository
         uses: actions/checkout@v4
         with:
-          ref: atomic-bridge
+          ref: ps4-linux-6.15.y
           submodules: recursive
 
       - name: Install dependencies
